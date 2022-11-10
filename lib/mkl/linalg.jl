@@ -53,6 +53,7 @@ function LinearAlgebra.axpy!(alpha::Number, x::oneStridedVecOrMat{<:onemklFloat}
     length(x)==length(y) || throw(DimensionMismatch("axpy arguments have lengths $(length(x)) and $(length(y))"))
     oneMKL.axpy!(length(x), alpha, x, y)
 end
+LinearAlgebra.norm(x::oneStridedVecOrMat{<:onemklFloat}) = oneMKL.nrm2(length(x), x)
 
 for NT in (Number, Real)
     # NOTE: alpha/beta also ::Real to avoid ambiguities with certain Base methods
