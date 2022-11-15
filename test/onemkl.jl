@@ -35,5 +35,8 @@ m = 20
             @test Array(dx) == y
             @test Array(dy) == x
         end
+
+        @testset "dot" begin
+            @test testf(dot, rand(T,m), rand(T,n))
     end
 end

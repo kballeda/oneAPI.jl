@@ -81,6 +81,12 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
     return 0;
 }
 
+extern "C" void onemklSdot(syclQueue_t device_queue, int64_t n,
+                           const float *x, int64_t incx, const float *y,
+                           int64_t incy, float *result) {
+    auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x, incx, y, incy, result);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

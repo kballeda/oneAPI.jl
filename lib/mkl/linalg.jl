@@ -51,6 +51,12 @@ end
 
 LinearAlgebra.norm(x::oneStridedVecOrMat{<:onemklFloat}) = oneMKL.nrm2(length(x), x)
 
+function LinearAlgebra.dot(x::oneStridedArray{<:onemklFloat}, y::oneStridedArray{<:onemklFloat})
+    n = length(x)
+    n == length(y) || throw(DimensionMismatch("dot product arguments have lengths $(length(x)) and $(length(y))"))
+    oneMKL.dot(n, x, y)
+end
+
 for NT in (Number, Real)
     # NOTE: alpha/beta also ::Real to avoid ambiguities with certain Base methods
     @eval begin
