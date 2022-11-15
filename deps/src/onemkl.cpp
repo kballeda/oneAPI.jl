@@ -85,6 +85,14 @@ extern "C" void onemklSdot(syclQueue_t device_queue, int64_t n,
                            const float *x, int64_t incx, const float *y,
                            int64_t incy, float *result) {
     auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x, incx, y, incy, result);
+    status.wait();
+}
+
+extern "C" void onemklDdot(syclQueue_t device_queue, int64_t n,
+                           const double *x, int64_t incx, const double *y,
+                           int64_t incy, double *result) {
+    auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x, incx, y, incy, result);
+    status.wait();
 }
 
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 

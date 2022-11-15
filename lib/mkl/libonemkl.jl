@@ -45,6 +45,12 @@ end
 function onemklSdot(device_queue, n, x, incx, y, incy, result)
     @ccall liboneapi_support.onemklSdot(device_queue::syclQueue_t, n::Int64,
                                         x::ZePtr{Cfloat}, incx::Int64, y::ZePtr{Cfloat}, 
+                                        incy::Int64, result::RefOrZeRef{Cfloat})::Cvoid
+end
+
+function onemklDdot(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklDdot(device_queue::syclQueue_t, n::Int64,
+                                        x::ZePtr{Cdouble}, incx::Int64, y::ZePtr{Cdouble}, 
                                         incy::Int64, result::RefOrZeRef{Cdouble})::Cvoid
 end
 

@@ -34,11 +34,12 @@ end
 
 ## dot
 for (fname, elty, ret_type) in
-        ((:onemklSdot, :Float32, :Float32, :Float32))
+        ((:onemklSdot,:Float32,:Float32),
+         (:onemklDdot,:Float64,:Float64))
     @eval begin
         function dot(n::Integer,
-                     x::oneStridedArray{$elty},
-                     y::oneStridedArray{$elty})
+                         x::oneStridedArray{$elty},
+                         y::oneStridedArray{$elty})
             queue = global_queue(context(x), device(x))
             result = oneArray{$ret_type}([0]);
             $fname(sycl_queue(queue), n, x, stride(x,1), y, stride(y,1), result)

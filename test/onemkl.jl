@@ -37,6 +37,11 @@ m = 20
         end
 
         @testset "dot" begin
-            @test testf(dot, rand(T,m), rand(T,n))
+            if T === Float32
+                x = rand(T,m)
+                y = rand(T,m)
+                @test testf(dot, x, y)
+            end
+        end
     end
 end

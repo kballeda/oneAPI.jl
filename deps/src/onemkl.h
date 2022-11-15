@@ -52,6 +52,9 @@ void onemklZnrm2(syclQueue_t device_queue, int64_t n, const double _Complex *x,
 void onemklSdot(syclQueue_t device_queue, int64_t n, const float *x,
                 int64_t incx, const float *y, int64_t incy, float *result);
 
+void onemklDdot(syclQueue_t device_queue, int64_t n, const double *x,
+                int64_t incx, const double *y, int64_t incy, double *result);
+
 void onemklDcopy(syclQueue_t device_queue, int64_t n, const double *x,
                  int64_t incx, double *y, int64_t incy);
 void onemklScopy(syclQueue_t device_queue, int64_t n, const float *x,
