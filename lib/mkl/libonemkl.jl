@@ -44,14 +44,26 @@ end
 
 function onemklSdot(device_queue, n, x, incx, y, incy, result)
     @ccall liboneapi_support.onemklSdot(device_queue::syclQueue_t, n::Int64,
-                                        x::ZePtr{Cfloat}, incx::Int64, y::ZePtr{Cfloat}, 
+                                        x::ZePtr{Cfloat}, incx::Int64, y::ZePtr{Cfloat},
                                         incy::Int64, result::RefOrZeRef{Cfloat})::Cvoid
 end
 
 function onemklDdot(device_queue, n, x, incx, y, incy, result)
     @ccall liboneapi_support.onemklDdot(device_queue::syclQueue_t, n::Int64,
-                                        x::ZePtr{Cdouble}, incx::Int64, y::ZePtr{Cdouble}, 
+                                        x::ZePtr{Cdouble}, incx::Int64, y::ZePtr{Cdouble},
                                         incy::Int64, result::RefOrZeRef{Cdouble})::Cvoid
+end
+
+function onemklSdotc(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklSdotc(device_queue::syclQueue_t, n::Int64,
+                                        x::ZePtr{ComplexF32}, incx::Int64, y::ZePtr{ComplexF32},
+                                        incy::Int64, result::RefOrZeRef{ComplexF32})::Cvoid
+end
+
+function onemklDdotc(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklDdotc(device_queue::syclQueue_t, n::Int64,
+                                        x::ZePtr{ComplexF64}, incx::Int64, y::ZePtr{ComplexF64},
+                                        incy::Int64, result::RefOrZeRef{ComplexF64})::Cvoid
 end
 
 function onemklDnrm2(device_queue, n, x, incx, result)

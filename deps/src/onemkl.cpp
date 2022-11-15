@@ -95,6 +95,26 @@ extern "C" void onemklDdot(syclQueue_t device_queue, int64_t n,
     status.wait();
 }
 
+extern "C" void onemklSdotc(syclQueue_t device_queue, int64_t n,
+                           const float _Complex *x, int64_t incx, const float _Complex *y,
+                           int64_t incy, float _Complex *result) {
+    auto status = oneapi::mkl::blas::column_major::dotc(device_queue->val, n,
+                                                    reinterpret_cast<const std::complex<float> *>(x), incx,
+                                                    reinterpret_cast<const std::complex<float> *>(y), incy,
+                                                    reinterpret_cast<std::complex<float> *>(result));
+    status.wait();
+}
+
+extern "C" void onemklDdotc(syclQueue_t device_queue, int64_t n,
+                           const double _Complex *x, int64_t incx, const double _Complex *y,
+                           int64_t incy, double _Complex *result) {
+    auto status = oneapi::mkl::blas::column_major::dotc(device_queue->val, n,
+                                                    reinterpret_cast<const std::complex<double> *>(x), incx,
+                                                    reinterpret_cast<const std::complex<double> *>(y), incy,
+                                                    reinterpret_cast<std::complex<double> *>(result));
+    status.wait();
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

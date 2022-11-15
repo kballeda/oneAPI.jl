@@ -33,11 +33,13 @@ for (fname, elty, ret_type) in
 end
 
 ## dot
-for (fname, elty, ret_type) in
-        ((:onemklSdot,:Float32,:Float32),
-         (:onemklDdot,:Float64,:Float64))
+for (jname, fname, elty, ret_type) in
+        ((:dot, :onemklSdot,:Float32,:Float32),
+         (:dot, :onemklDdot,:Float64,:Float64),
+         (:dotc, :onemklSdotc, :ComplexF32, :ComplexF32),
+         (:dotc, :onemklDdotc, :ComplexF64, :ComplexF64))
     @eval begin
-        function dot(n::Integer,
+        function $jname(n::Integer,
                          x::oneStridedArray{$elty},
                          y::oneStridedArray{$elty})
             queue = global_queue(context(x), device(x))
