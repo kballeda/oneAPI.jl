@@ -61,6 +61,12 @@ void onemklSdotc(syclQueue_t device_queue, int64_t n, const float _Complex *x,
 void onemklDdotc(syclQueue_t device_queue, int64_t n, const double _Complex *x,
                 int64_t incx, const double _Complex *y, int64_t incy, double _Complex *result);
 
+void onemklSdotu(syclQueue_t device_queue, int64_t n, const float _Complex *x,
+                int64_t incx, const float _Complex *y, int64_t incy, float _Complex *result);
+
+void onemklDdotu(syclQueue_t device_queue, int64_t n, const double _Complex *x,
+                int64_t incx, const double _Complex *y, int64_t incy, double _Complex *result);
+
 void onemklDcopy(syclQueue_t device_queue, int64_t n, const double *x,
                  int64_t incx, double *y, int64_t incy);
 void onemklScopy(syclQueue_t device_queue, int64_t n, const float *x,

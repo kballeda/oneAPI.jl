@@ -37,7 +37,9 @@ for (jname, fname, elty, ret_type) in
         ((:dot, :onemklSdot,:Float32,:Float32),
          (:dot, :onemklDdot,:Float64,:Float64),
          (:dotc, :onemklSdotc, :ComplexF32, :ComplexF32),
-         (:dotc, :onemklDdotc, :ComplexF64, :ComplexF64))
+         (:dotc, :onemklDdotc, :ComplexF64, :ComplexF64),
+         (:dotu, :onemklSdotu, :ComplexF32, :ComplexF32),
+         (:dotu, :onemklDdotu, :ComplexF64, :ComplexF64))
     @eval begin
         function $jname(n::Integer,
                          x::oneStridedArray{$elty},

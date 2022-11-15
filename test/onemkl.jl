@@ -38,6 +38,11 @@ m = 20
 
         @testset "dot" begin
             @test testf(dot, rand(T,m), rand(T,m))
+            if T == ComplexF32 || T == ComplexF64
+                @test testf(oneMKL.dotu, m, 
+                            oneArray(rand(T,m)),
+                            oneArray(rand(T,m)))
+            end
         end
     end
 end

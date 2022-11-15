@@ -66,6 +66,18 @@ function onemklDdotc(device_queue, n, x, incx, y, incy, result)
                                         incy::Int64, result::RefOrZeRef{ComplexF64})::Cvoid
 end
 
+function onemklSdotu(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklSdotu(device_queue::syclQueue_t, n::Int64,
+                                        x::ZePtr{ComplexF32}, incx::Int64, y::ZePtr{ComplexF32},
+                                        incy::Int64, result::RefOrZeRef{ComplexF32})::Cvoid
+end
+
+function onemklDdotu(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklDdotu(device_queue::syclQueue_t, n::Int64,
+                                        x::ZePtr{ComplexF64}, incx::Int64, y::ZePtr{ComplexF64},
+                                        incy::Int64, result::RefOrZeRef{ComplexF64})::Cvoid
+end
+
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 
                                 n::Int64, x::ZePtr{Cdouble}, incx::Int64, 
