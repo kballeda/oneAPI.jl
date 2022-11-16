@@ -28,7 +28,7 @@ function onemklCgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, 
 end
 
 function onemklZgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
-    @ccall liboneapi_support.onemklCgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
+    @ccall liboneapi_support.onemklZgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
                                         m::Int64, n::Int64, kl::Int64, ku::Int64, alpha::ComplexF64,
                                         a::ZePtr{ComplexF64}, lda::Int64, x::ZePtr{ComplexF64}, incx::Int64,
                                         beta::ComplexF64, y::ZePtr{ComplexF64}, incy::Int64)::Cvoid
