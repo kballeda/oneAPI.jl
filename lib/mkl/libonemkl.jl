@@ -14,7 +14,7 @@ function onemklSgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, 
 end
 
 function onemklDgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
-    @ccall liboneapi_support.onemklSgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
+    @ccall liboneapi_support.onemklDgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
                                         m::Int64, n::Int64, kl::Int64, ku::Int64, alpha::Cdouble,
                                         a::ZePtr{Cdouble}, lda::Int64, x::ZePtr{Cdouble}, incx::Int64,
                                         beta::Cdouble, y::ZePtr{Cdouble}, incy::Int64)::Cvoid
