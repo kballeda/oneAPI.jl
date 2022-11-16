@@ -14,6 +14,45 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+# level 2
+## gemv
+for (fname, elty) in ((:onemklSgemv, :Float32),
+                      (:onemklDgemv, :Float64))
+    @eval begin
+        function gemv!(trans::Char,
+                       alpha::Number,
+                       a::oneStridedArray{$elty},
+                       x::oneStridedArray{$elty},
+                       beta::Number, 
+                       y::oneStridedArray{$elty})
+            queue = global_queue(context(x), device(x))
+             # handle trans
+             m,n = size(a)
+             # check dimensions
+             length(X) == (trans == 'N' ? n : m) && length(Y) == (trans == 'N' ? m : n) || throw(DimensionMismatch(""))
+             # compute increments
+             lda = max(1,stride(a,2))
+             incx = stride(x,1)
+             incy = stride(y,1)
+             $fname(sycl_queue(queue), trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
+             y
+        end
+
+        function gemv(trans::Char,
+                      alpha::Number,
+                      A::oneStridedArray{$elty},
+                      X::oneStridedArray{$elty})
+            gemv!(trans, alpha, A, X, zero($elty), similar(X, $elty, size(A, (trans == 'N' ? 1 : 2))))
+        end
+
+        function gemv(trans::Char,
+                      a::oneStridedArray{$elty},
+                      x::oneStridedArray{$elty})
+            gemv!(trans, one($elty), A, X, zero($elty), similar(X, $elty, size(A, (trans == 'N' ? 1 : 2))))
+        end
+    end
+end
+
 # level 1
 ## nrm2
 for (fname, elty, ret_type) in

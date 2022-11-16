@@ -4,6 +4,8 @@ using oneAPI.oneMKL
 using LinearAlgebra
 
 m = 20
+n = 35
+k = 13
 
 ############################################################################################
 @testset "level 1" begin
@@ -34,6 +36,40 @@ m = 20
             oneMKL.swap!(m, dx, dy)
             @test Array(dx) == y
             @test Array(dy) == x
+        end
+    end
+end
+
+@testset "level 2" begin
+    @testset for elty in [Float32, Float64, ComplexF32, ComplexF64]
+        alpha = rand(elty)
+        beta = rand(elty)
+
+        @testset "gemv" begin
+            @test testf(*, rand(elty, m, n), rand(elty, n))
+            @test testf(*, transpose(rand(elty, m, n)), rand(elty, m))
+            @test testf(*, rand(elty, m, n)', rand(elty, m))
+            x = rand(elty, m)
+            A = rand(elty, m, m + 1 )
+            y = rand(elty, m)
+            dx = oneArray(x)
+            dA = oneArray(A)
+            dy = oneArray(y)
+            @test_throws DimensionMismatch mul!(dy, dA, dx)
+            A = rand(elty, m + 1, m )
+            dA = oneArray(A)
+            @test_throws DimensionMismatch mul!(dy, dA, dx)
+            x = rand(elty, m)
+            A = rand(elty, n, m)
+            dx = oneArray(x)
+            dA = oneArray(A)
+            alpha = rand(elty)
+            dy = oneMKL.gemv('N', alpha, dA, dx)
+            hy = collect(dy)
+            @test hy ≈ alpha * A * x
+            dy = oneMKL.gemv('N', dA, dx)
+            hy = collect(dy)
+            @test hy ≈ A * x
         end
     end
 end
