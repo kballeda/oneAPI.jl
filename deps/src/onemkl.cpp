@@ -84,14 +84,16 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
 extern "C" void onemklSdot(syclQueue_t device_queue, int64_t n,
                            const float *x, int64_t incx, const float *y,
                            int64_t incy, float *result) {
-    auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x, incx, y, incy, result);
+    auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x,
+                                                       incx, y, incy, result);
     status.wait();
 }
 
 extern "C" void onemklDdot(syclQueue_t device_queue, int64_t n,
                            const double *x, int64_t incx, const double *y,
                            int64_t incy, double *result) {
-    auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x, incx, y, incy, result);
+    auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x,
+                                                       incx, y, incy, result);
     status.wait();
 }
 
@@ -99,9 +101,9 @@ extern "C" void onemklSdotc(syclQueue_t device_queue, int64_t n,
                            const float _Complex *x, int64_t incx, const float _Complex *y,
                            int64_t incy, float _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotc(device_queue->val, n,
-                                                    reinterpret_cast<const std::complex<float> *>(x), incx,
-                                                    reinterpret_cast<const std::complex<float> *>(y), incy,
-                                                    reinterpret_cast<std::complex<float> *>(result));
+                                                reinterpret_cast<const std::complex<float> *>(x), incx,
+                                                reinterpret_cast<const std::complex<float> *>(y), incy,
+                                                reinterpret_cast<std::complex<float> *>(result));
     status.wait();
 }
 
@@ -109,9 +111,9 @@ extern "C" void onemklDdotc(syclQueue_t device_queue, int64_t n,
                            const double _Complex *x, int64_t incx, const double _Complex *y,
                            int64_t incy, double _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotc(device_queue->val, n,
-                                                    reinterpret_cast<const std::complex<double> *>(x), incx,
-                                                    reinterpret_cast<const std::complex<double> *>(y), incy,
-                                                    reinterpret_cast<std::complex<double> *>(result));
+                                                reinterpret_cast<const std::complex<double> *>(x), incx,
+                                                reinterpret_cast<const std::complex<double> *>(y), incy,
+                                                reinterpret_cast<std::complex<double> *>(result));
     status.wait();
 }
 
@@ -119,9 +121,9 @@ extern "C" void onemklSdotu(syclQueue_t device_queue, int64_t n,
                            const float _Complex *x, int64_t incx, const float _Complex *y,
                            int64_t incy, float _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotu(device_queue->val, n,
-                                                    reinterpret_cast<const std::complex<float> *>(x), incx,
-                                                    reinterpret_cast<const std::complex<float> *>(y), incy,
-                                                    reinterpret_cast<std::complex<float> *>(result));
+                                                reinterpret_cast<const std::complex<float> *>(x), incx,
+                                                reinterpret_cast<const std::complex<float> *>(y), incy,
+                                                reinterpret_cast<std::complex<float> *>(result));
     status.wait();
 }
 
@@ -129,9 +131,9 @@ extern "C" void onemklDdotu(syclQueue_t device_queue, int64_t n,
                            const double _Complex *x, int64_t incx, const double _Complex *y,
                            int64_t incy, double _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotu(device_queue->val, n,
-                                                    reinterpret_cast<const std::complex<double> *>(x), incx,
-                                                    reinterpret_cast<const std::complex<double> *>(y), incy,
-                                                    reinterpret_cast<std::complex<double> *>(result));
+                                                reinterpret_cast<const std::complex<double> *>(x), incx,
+                                                reinterpret_cast<const std::complex<double> *>(y), incy,
+                                                reinterpret_cast<std::complex<double> *>(result));
     status.wait();
 }
 
