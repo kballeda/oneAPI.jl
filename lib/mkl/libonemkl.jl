@@ -54,26 +54,26 @@ function onemklDdot(device_queue, n, x, incx, y, incy, result)
                                         incy::Int64, result::RefOrZeRef{Cdouble})::Cvoid
 end
 
-function onemklSdotc(device_queue, n, x, incx, y, incy, result)
-    @ccall liboneapi_support.onemklSdotc(device_queue::syclQueue_t, n::Int64,
+function onemklCdotc(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklCdotc(device_queue::syclQueue_t, n::Int64,
                                         x::ZePtr{ComplexF32}, incx::Int64, y::ZePtr{ComplexF32},
                                         incy::Int64, result::RefOrZeRef{ComplexF32})::Cvoid
 end
 
-function onemklDdotc(device_queue, n, x, incx, y, incy, result)
-    @ccall liboneapi_support.onemklDdotc(device_queue::syclQueue_t, n::Int64,
+function onemklZdotc(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklZdotc(device_queue::syclQueue_t, n::Int64,
                                         x::ZePtr{ComplexF64}, incx::Int64, y::ZePtr{ComplexF64},
                                         incy::Int64, result::RefOrZeRef{ComplexF64})::Cvoid
 end
 
-function onemklSdotu(device_queue, n, x, incx, y, incy, result)
-    @ccall liboneapi_support.onemklSdotu(device_queue::syclQueue_t, n::Int64,
+function onemklCdotu(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklCdotu(device_queue::syclQueue_t, n::Int64,
                                         x::ZePtr{ComplexF32}, incx::Int64, y::ZePtr{ComplexF32},
                                         incy::Int64, result::RefOrZeRef{ComplexF32})::Cvoid
 end
 
-function onemklDdotu(device_queue, n, x, incx, y, incy, result)
-    @ccall liboneapi_support.onemklDdotu(device_queue::syclQueue_t, n::Int64,
+function onemklZdotu(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklZdotu(device_queue::syclQueue_t, n::Int64,
                                         x::ZePtr{ComplexF64}, incx::Int64, y::ZePtr{ComplexF64},
                                         incy::Int64, result::RefOrZeRef{ComplexF64})::Cvoid
 end

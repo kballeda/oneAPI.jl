@@ -33,19 +33,19 @@ for (fname, elty, ret_type) in
 end
 
 ## dot
-for (jname, fname, elty, ret_type) in
-        ((:dot, :onemklSdot,:Float32,:Float32),
-         (:dot, :onemklDdot,:Float64,:Float64),
-         (:dotc, :onemklSdotc, :ComplexF32, :ComplexF32),
-         (:dotc, :onemklDdotc, :ComplexF64, :ComplexF64),
-         (:dotu, :onemklSdotu, :ComplexF32, :ComplexF32),
-         (:dotu, :onemklDdotu, :ComplexF64, :ComplexF64))
+for (jname, fname, elty) in
+        ((:dot, :onemklSdot,:Float32),
+         (:dot, :onemklDdot,:Float64),
+         (:dotc, :onemklCdotc, :ComplexF32),
+         (:dotc, :onemklZdotc, :ComplexF64),
+         (:dotu, :onemklCdotu, :ComplexF32),
+         (:dotu, :onemklZdotu, :ComplexF64))
     @eval begin
         function $jname(n::Integer,
                          x::oneStridedArray{$elty},
                          y::oneStridedArray{$elty})
             queue = global_queue(context(x), device(x))
-            result = oneArray{$ret_type}([0]);
+            result = oneArray{$elty}([0]);
             $fname(sycl_queue(queue), n, x, stride(x,1), y, stride(y,1), result)
             res = Array(result)
             return res[1]

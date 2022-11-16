@@ -97,7 +97,7 @@ extern "C" void onemklDdot(syclQueue_t device_queue, int64_t n,
     status.wait();
 }
 
-extern "C" void onemklSdotc(syclQueue_t device_queue, int64_t n,
+extern "C" void onemklCdotc(syclQueue_t device_queue, int64_t n,
                            const float _Complex *x, int64_t incx, const float _Complex *y,
                            int64_t incy, float _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotc(device_queue->val, n,
@@ -107,7 +107,7 @@ extern "C" void onemklSdotc(syclQueue_t device_queue, int64_t n,
     status.wait();
 }
 
-extern "C" void onemklDdotc(syclQueue_t device_queue, int64_t n,
+extern "C" void onemklZdotc(syclQueue_t device_queue, int64_t n,
                            const double _Complex *x, int64_t incx, const double _Complex *y,
                            int64_t incy, double _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotc(device_queue->val, n,
@@ -117,7 +117,7 @@ extern "C" void onemklDdotc(syclQueue_t device_queue, int64_t n,
     status.wait();
 }
 
-extern "C" void onemklSdotu(syclQueue_t device_queue, int64_t n,
+extern "C" void onemklCdotu(syclQueue_t device_queue, int64_t n,
                            const float _Complex *x, int64_t incx, const float _Complex *y,
                            int64_t incy, float _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotu(device_queue->val, n,
@@ -127,7 +127,7 @@ extern "C" void onemklSdotu(syclQueue_t device_queue, int64_t n,
     status.wait();
 }
 
-extern "C" void onemklDdotu(syclQueue_t device_queue, int64_t n,
+extern "C" void onemklZdotu(syclQueue_t device_queue, int64_t n,
                            const double _Complex *x, int64_t incx, const double _Complex *y,
                            int64_t incy, double _Complex *result) {
     auto status = oneapi::mkl::blas::column_major::dotu(device_queue->val, n,
