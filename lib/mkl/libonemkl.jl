@@ -51,7 +51,7 @@ end
 
 function onemklDgemv(device_queue, trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
     @ccall liboneapi_support.onemklDgemv(device_queue::syclQueue_t, trans::onemklTranspose,
-                                        m::Int64, n::Int64, alpha::Cfloat, a::ZePtr{Cdouble},
+                                        m::Int64, n::Int64, alpha::Cdouble, a::ZePtr{Cdouble},
                                         lda::Int64, x::ZePtr{Cdouble}, incx::Int64, beta::Cdouble,
                                         y::ZePtr{Cdouble}, incy::Int64)::Cvoid
 end
