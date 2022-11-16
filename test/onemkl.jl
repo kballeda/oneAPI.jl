@@ -60,7 +60,6 @@ end
             d_x = oneArray(x)
 
             @testset "gbmv!" begin
-                try 
                 # Test: y = alpha * A * x + beta * y
                 y = rand(T, m)
                 d_y = oneArray(y)
@@ -68,9 +67,7 @@ end
                 BLAS.gbmv!('N', m, kl, ku, alpha, Ab, x, beta, y)
                 h_y = Array(d_y)
                 @test y ≈ h_y
-                catch err
-                    print(err)
-                end
+
                 # Test: y = alpha * transpose(A) * x + beta * y
                 x = rand(T, n)
                 d_x = oneArray(x)

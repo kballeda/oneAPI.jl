@@ -105,8 +105,8 @@ extern "C" void onemklCgbmv(syclQueue_t device_queue, onemklTranspose trans,
                             const float _Complex *x, int64_t incx, float _Complex beta, float _Complex *y,
                             int64_t incy) {
     oneapi::mkl::blas::column_major::gbmv(device_queue->val, convert(trans), m, n, kl, ku,
-                                          static_cast<float>(alpha), reinterpret_cast<const std::complex<float> *>(a), 
-                                          lda, reinterpret_cast<const std::complex<float> *>(x), incx, static_cast<float>(beta), 
+                                          static_cast<std::complex<float> >(alpha), reinterpret_cast<const std::complex<float> *>(a), 
+                                          lda, reinterpret_cast<const std::complex<float> *>(x), incx, static_cast<std::complex<float> >(beta), 
                                           reinterpret_cast<std::complex<float> *>(y), incy);
 }
 
