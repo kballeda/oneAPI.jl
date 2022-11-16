@@ -41,7 +41,7 @@ k = 13
 end
 
 @testset "level 2" begin
-    @testset for elty in [Float32, Float64, ComplexF32, ComplexF64]
+    @testset for elty in [Float32]
         alpha = rand(elty)
         beta = rand(elty)
 

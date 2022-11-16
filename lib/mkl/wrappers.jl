@@ -29,7 +29,7 @@ for (fname, elty) in ((:onemklSgemv, :Float32),
              # handle trans
              m,n = size(a)
              # check dimensions
-             length(X) == (trans == 'N' ? n : m) && length(Y) == (trans == 'N' ? m : n) || throw(DimensionMismatch(""))
+             length(x) == (trans == 'N' ? n : m) && length(y) == (trans == 'N' ? m : n) || throw(DimensionMismatch(""))
              # compute increments
              lda = max(1,stride(a,2))
              incx = stride(x,1)
@@ -40,15 +40,15 @@ for (fname, elty) in ((:onemklSgemv, :Float32),
 
         function gemv(trans::Char,
                       alpha::Number,
-                      A::oneStridedArray{$elty},
-                      X::oneStridedArray{$elty})
-            gemv!(trans, alpha, A, X, zero($elty), similar(X, $elty, size(A, (trans == 'N' ? 1 : 2))))
+                      a::oneStridedArray{$elty},
+                      x::oneStridedArray{$elty})
+            gemv!(trans, alpha, a, x, zero($elty), similar(x, $elty, size(a, (trans == 'N' ? 1 : 2))))
         end
 
         function gemv(trans::Char,
                       a::oneStridedArray{$elty},
                       x::oneStridedArray{$elty})
-            gemv!(trans, one($elty), A, X, zero($elty), similar(X, $elty, size(A, (trans == 'N' ? 1 : 2))))
+            gemv!(trans, one($elty), a, x, zero($elty), similar(x, $elty, size(a, (trans == 'N' ? 1 : 2))))
         end
     end
 end
