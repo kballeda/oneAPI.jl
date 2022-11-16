@@ -17,7 +17,9 @@ end
 # level 2
 ## gemv
 for (fname, elty) in ((:onemklSgemv, :Float32),
-                      (:onemklDgemv, :Float64))
+                      (:onemklDgemv, :Float64),
+                      (:onemklCgemv, :ComplexF32),
+                      (:onemklZgemv, :ComplexF64))
     @eval begin
         function gemv!(trans::Char,
                        alpha::Number,
