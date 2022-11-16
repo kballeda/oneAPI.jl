@@ -81,6 +81,24 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
     return 0;
 }
 
+extern "C" void onemklSgbmv(syclQueue_t device_queue, onemklTranspose trans,
+                            int64_t m, int64_t n, int64_t kl, int64_t ku, 
+                            float alpha, const float *a, int64_t lda,
+                            const float *x, int64_t incx, float beta, float *y,
+                            int64_t incy) {
+    oneapi::mkl::blas::column_major::gbmv(device_queue->val, convert(trans), m, n, kl, ku,
+                                          alpha, a, lda, x, incx, beta, y, incy);
+}
+
+extern "C" void onemklDgbmv(syclQueue_t device_queue, onemklTranspose trans,
+                            int64_t m, int64_t n, int64_t kl, int64_t ku, 
+                            double alpha, const double *a, int64_t lda,
+                            const double *x, int64_t incx, double beta, double *y,
+                            int64_t incy) {
+    oneapi::mkl::blas::column_major::gbmv(device_queue->val, convert(trans), m, n, kl, ku,
+                                          alpha, a, lda, x, incx, beta, y, incy);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

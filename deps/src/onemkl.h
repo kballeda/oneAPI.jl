@@ -39,6 +39,16 @@ int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
                 const double _Complex *B, int64_t ldb, double _Complex beta,
                 double _Complex *C, int64_t ldc);
 
+void onemklSgbmv(syclQueue_t device_queue, onemklTranspose trans, int64_t m,
+                int64_t n, int64_t kl, int64_t ku, float alpha, const float *a,
+                int64_t lda, const float *x, int64_t incx, float beta, float *y,
+                int64_t incy);
+
+void onemklDgbmv(syclQueue_t device_queue, onemklTranspose trans, int64_t m,
+                int64_t n, int64_t kl, int64_t ku, double alpha, const double *a,
+                int64_t lda, const double *x, int64_t incx, double beta, double *y,
+                int64_t incy);
+
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                  int64_t incx, double *result);

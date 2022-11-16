@@ -6,6 +6,21 @@ using CEnum
     ONEMLK_TRANSPOSE_CONJTRANS = 2
 end
 
+function onemklSgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklSgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
+                                        m::Int64, n::Int64, kl::Int64, ku::Int64, alpha::Cfloat,
+                                        a::ZePtr{Cfloat}, lda::Int64, x::ZePtr{Cfloat}, incx::Int64,
+                                        beta::Cfloat, y::ZePtr{Cfloat}, incy::Int64)::Cvoid
+end
+
+function onemklDgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklSgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
+                                        m::Int64, n::Int64, kl::Int64, ku::Int64, alpha::Cdouble,
+                                        a::ZePtr{Cdouble}, lda::Int64, x::ZePtr{Cdouble}, incx::Int64,
+                                        beta::Cdouble, y::ZePtr{Cdouble}, incy::Int64)::Cvoid
+end
+
+
 function onemklSgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)
     @ccall liboneapi_support.onemklSgemm(device_queue::syclQueue_t, transA::onemklTranspose,

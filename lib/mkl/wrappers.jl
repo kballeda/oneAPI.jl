@@ -105,6 +105,53 @@ for (fname, elty) in ((:onemklSswap,:Float32),
     end
 end
 
+# level 2
+# gbmv
+for (fname, elty) in ((:onemklSgbmv, :Float32),
+                      (:onemklDgbmv, :Float64))
+    @eval begin
+        function gbmv!(trans::Char,
+                       m::Integer,
+                       kl::Integer,
+                       ku::Integer,
+                       alpha::Number,
+                       a::oneStridedArray{$elty},
+                       x::oneStridedArray{$elty},
+                       beta::Number,
+                       y::oneStridedArray{$elty})
+            n = size(a,2)
+            length(x) == (trans == 'N' ? n : m) && length(y) == (trans == 'N' ? m : n) || throw(DimensionMismatch(""))
+            queue = global_queue(context(x), device(x))
+            lda = max(1, stride(a,2))
+            incx = stride(x,1)
+            incy = stride(y,1)
+            $fname(sycl_queue(queue), trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
+            y
+        end
+        function gbmv(trans::Char,
+                      m::Integer, 
+                      kl::Integer,
+                      ku::Integer,
+                      alpha::Number,
+                      a::oneStridedArray{$elty},
+                      x::oneStridedArray{$elty})
+            n = size(a,2)
+            leny = trans == 'N' ? m : n
+            queue = global_queue(context(x), device(x))
+            gbmv!(sycl_queue(queue), trans, m, kl, ku, alpha, a, x, zero($elty), similar(x, $elty, leny))   
+        end
+
+        function gbmv(trans::Char,
+                      m::Integer,
+                      kl::Integer,
+                      ku::Integer,
+                      a::oneStridedArray{$elty},
+                      x::oneStridedArray{$elty})
+            gbmv(trans, m, kl, ku, one($elty), a, x)
+        end
+    end
+end
+
 # level 3
 
 for (fname, elty) in
