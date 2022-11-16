@@ -105,9 +105,24 @@ extern "C" void onemklCgbmv(syclQueue_t device_queue, onemklTranspose trans,
                             const float _Complex *x, int64_t incx, float _Complex beta, float _Complex *y,
                             int64_t incy) {
     oneapi::mkl::blas::column_major::gbmv(device_queue->val, convert(trans), m, n, kl, ku,
-                                          static_cast<std::complex<float> >(alpha), reinterpret_cast<const std::complex<float> *>(a), 
-                                          lda, reinterpret_cast<const std::complex<float> *>(x), incx, static_cast<std::complex<float> >(beta), 
+                                          static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<float> *>(a),
+                                          lda, reinterpret_cast<const std::complex<float> *>(x), incx,
+                                          static_cast<std::complex<float> >(beta), 
                                           reinterpret_cast<std::complex<float> *>(y), incy);
+}
+
+extern "C" void onemklZgbmv(syclQueue_t device_queue, onemklTranspose trans,
+                            int64_t m, int64_t n, int64_t kl, int64_t ku, 
+                            double _Complex alpha, const double _Complex *a, int64_t lda,
+                            const double _Complex *x, int64_t incx, double _Complex beta, double _Complex *y,
+                            int64_t incy) {
+    oneapi::mkl::blas::column_major::gbmv(device_queue->val, convert(trans), m, n, kl, ku,
+                                          static_cast<std::complex<double> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(a),
+                                          lda, reinterpret_cast<const std::complex<double> *>(x), incx,
+                                          static_cast<std::complex<double> >(beta), 
+                                          reinterpret_cast<std::complex<double> *>(y), incy);
 }
 
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 

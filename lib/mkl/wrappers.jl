@@ -109,7 +109,8 @@ end
 # gbmv
 for (fname, elty) in ((:onemklSgbmv, :Float32),
                       (:onemklDgbmv, :Float64),
-                      (:onemklCgbmv, :ComplexF32))
+                      (:onemklCgbmv, :ComplexF32),
+                      (:onemklZgbmv, :ComplexF64))
     @eval begin
         function gbmv!(trans::Char,
                        m::Integer,
