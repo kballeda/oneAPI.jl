@@ -20,6 +20,12 @@ function onemklDgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, 
                                         beta::Cdouble, y::ZePtr{Cdouble}, incy::Int64)::Cvoid
 end
 
+function onemklCgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklCgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
+                                        m::Int64, n::Int64, kl::Int64, ku::Int64, alpha::ComplexF32,
+                                        a::ZePtr{ComplexF32}, lda::Int64, x::ZePtr{ComplexF32}, incx::Int64,
+                                        beta::Cdouble, y::ZePtr{ComplexF32}, incy::Int64)::Cvoid
+end
 
 function onemklSgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)

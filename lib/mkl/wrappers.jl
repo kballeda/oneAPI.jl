@@ -108,7 +108,8 @@ end
 # level 2
 # gbmv
 for (fname, elty) in ((:onemklSgbmv, :Float32),
-                      (:onemklDgbmv, :Float64))
+                      (:onemklDgbmv, :Float64),
+                      (:onemklCgbmv, :ComplexF32))
     @eval begin
         function gbmv!(trans::Char,
                        m::Integer,
@@ -128,6 +129,7 @@ for (fname, elty) in ((:onemklSgbmv, :Float32),
             $fname(sycl_queue(queue), trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
             y
         end
+
         function gbmv(trans::Char,
                       m::Integer, 
                       kl::Integer,
@@ -138,7 +140,7 @@ for (fname, elty) in ((:onemklSgbmv, :Float32),
             n = size(a,2)
             leny = trans == 'N' ? m : n
             queue = global_queue(context(x), device(x))
-            gbmv!(sycl_queue(queue), trans, m, kl, ku, alpha, a, x, zero($elty), similar(x, $elty, leny))   
+            gbmv!(trans, m, kl, ku, alpha, a, x, zero($elty), similar(x, $elty, leny))   
         end
 
         function gbmv(trans::Char,
@@ -147,6 +149,7 @@ for (fname, elty) in ((:onemklSgbmv, :Float32),
                       ku::Integer,
                       a::oneStridedArray{$elty},
                       x::oneStridedArray{$elty})
+            queue = global_queue(context(x), device(x))
             gbmv(trans, m, kl, ku, one($elty), a, x)
         end
     end
