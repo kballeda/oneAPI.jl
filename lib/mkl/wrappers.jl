@@ -32,6 +32,25 @@ for (fname, elty, ret_type) in
     end
 end
 
+# level 2
+# ger
+for (fname, elty) in ((:onemklSger, :Float32),
+                      (:onemklDger, :Float64))
+    @eval begin
+        function ger!(alpha::Number,
+                      x::oneStridedArray{$elty},
+                      y::oneStridedArray{$elty},
+                      a::oneStridedArray{$elty})
+            m,n = size(a)
+            m == length(x) || throw(DimensionMismatch(""))
+            n == length(y) || throw(DimensionMismatch(""))
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), m, n, alpha, x, stride(x,1), y, stride(y,1), a, max(1,stride(a,2)))
+            a
+        end
+    end
+end
+
 #
 # BLAS
 #

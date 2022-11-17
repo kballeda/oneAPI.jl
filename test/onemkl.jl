@@ -37,3 +37,24 @@ m = 20
         end
     end
 end
+
+@testset "level 2" begin
+    @testset for T in intersect(eltypes, [Float32, Float64])
+        alpha = rand(T)
+        A = rand(T,m,m)
+        x = rand(T,m)
+        y = rand(T,m)
+        dA = oneArray(A)
+        dx = oneArray(x)
+        dy = oneArray(y)
+        @testset "ger!" begin
+            # perform rank one update
+            dB = copy(dA)
+            oneMKL.ger!(alpha,dx,dy,dB)
+            B = (alpha*x)*y' + A
+            # move to host and compare
+            hB = Array(dB)
+            @test B ≈ hB
+        end
+    end
+end
