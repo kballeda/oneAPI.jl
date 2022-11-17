@@ -65,6 +65,14 @@ void onemklZhbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
                 int64_t lda, const double _Complex *x, int64_t incx, double _Complex beta,
                 double _Complex *y, int64_t incy);
 
+void onemklCher(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                const float _Complex *x, int64_t incx, float _Complex *a,
+                int64_t lda);
+
+void onemklZher(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double alpha,
+                const double _Complex *x, int64_t incx, double _Complex *a,
+                int64_t lda);
+
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                  int64_t incx, double *result);

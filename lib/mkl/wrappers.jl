@@ -95,6 +95,26 @@ for (fname, elty) in ((:onemklChbmv,:ComplexF32),
     end
 end
 
+### her
+for (fname, elty) in ((:onemklCher,:ComplexF32),
+                      (:onemklZher,:ComplexF64))
+    @eval begin
+        function her!(uplo::Char,
+                      alpha::Number,
+                      x::oneStridedVecOrMat{$elty},
+                      A::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            m == n || throw(DimensionMismatch("Matrix A is $m by $n but must be square"))
+            length(x) == n || throw(DimensionMismatch("Length of vector must be the same as the matrix dimensions"))
+            incx = stride(x,1)
+            lda = max(1,stride(A,2))
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, alpha, x, incx, A, lda)
+            A
+        end
+    end
+end
+
 # level 1
 ## nrm2
 for (fname, elty, ret_type) in

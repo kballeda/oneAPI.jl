@@ -138,6 +138,22 @@ extern "C" void onemklZhbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n
                                           reinterpret_cast<std::complex<double> *>(y), incy);
 }
 
+extern "C" void onemklCher(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                           const float _Complex *x, int64_t incx, float _Complex *a,
+                           int64_t lda) {
+    oneapi::mkl::blas::column_major::her(device_queue->val, convert(uplo), n, alpha,
+                                        reinterpret_cast<const std::complex<float> *>(x), incx,
+                                        reinterpret_cast<std::complex<float> *>(a), lda);
+}
+
+extern "C" void onemklZher(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double alpha,
+                           const double _Complex *x, int64_t incx, double _Complex *a,
+                           int64_t lda) {
+    oneapi::mkl::blas::column_major::her(device_queue->val, convert(uplo), n, alpha,
+                                        reinterpret_cast<const std::complex<double> *>(x), incx,
+                                        reinterpret_cast<std::complex<double> *>(a), lda);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

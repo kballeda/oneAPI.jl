@@ -133,5 +133,27 @@ end
             @test y ≈ h_y
         end
 
+        @testset "her!" begin
+            A = rand(T,m,n)
+            dA = oneArray(A)
+            sA = rand(T,m,m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            hA = rand(T,m,m)
+            hA = hA + hA'
+            dhA = oneArray(hA)
+            x = rand(T,m)
+            dx = oneArray(x)
+            dB = copy(dhA)
+            # perform rank one update
+            oneMKL.her!('U',real(alpha),dx,dB)
+            B = (real(alpha)*x)*x' + hA
+            # move to host and compare upper triangles
+            hB = Array(dB)
+            B = triu(B)
+            hB = triu(hB)
+            @test B ≈ hB
+        end
+
     end
 end
