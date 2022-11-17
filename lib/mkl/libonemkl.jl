@@ -87,6 +87,20 @@ function onemklZher(device_queue, uplo, n, alpha, x, incx, a, lda)
                                         incx::Int64, a::ZePtr{ComplexF64}, lda::Int64)::Cvoid
 end
 
+function onemklCher2(device_queue, uplo, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklCher2(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::ComplexF32, x::ZePtr{ComplexF32},
+                                         incx::Int64, y::ZePtr{ComplexF32}, incy::Int64,
+                                         a::ZePtr{ComplexF32}, lda::Int64)::Cvoid
+end
+
+function onemklZher2(device_queue, uplo, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklZher2(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::ComplexF64, x::ZePtr{ComplexF64},
+                                         incx::Int64, y::ZePtr{ComplexF64}, incy::Int64,
+                                         a::ZePtr{ComplexF64}, lda::Int64)::Cvoid
+end
+
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 
                                 n::Int64, x::ZePtr{Cdouble}, incx::Int64, 

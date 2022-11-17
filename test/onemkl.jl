@@ -155,5 +155,28 @@ end
             @test B ≈ hB
         end
 
+        @testset "her2!" begin
+            A = rand(T,m,n)
+            dA = oneArray(A)
+            sA = rand(T,m,m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            hA = rand(T,m,m)
+            hA = hA + hA'
+            dhA = oneArray(hA)
+            x = rand(T,m)
+            dx = oneArray(x)
+            y = rand(T,m)
+            dy = oneArray(y)
+            dB = copy(dhA)
+            oneMKL.her2!('U',real(alpha),dx,dy,dB)
+            B = (real(alpha)*x)*y' + y*(real(alpha)*x)' + hA
+            # move to host and compare upper triangles
+            hB = Array(dB)
+            B = triu(B)
+            hB = triu(hB)
+            @test B ≈ hB
+        end
+    
     end
 end
