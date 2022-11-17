@@ -57,6 +57,44 @@ for (fname, elty) in ((:onemklChemv,:ComplexF32),
     end
 end
 
+### hbmv, (HB) Hermitian banded matrix-vector multiplication
+for (fname, elty) in ((:onemklChbmv,:ComplexF32),
+                      (:cublasZhbmv,:ComplexF64))
+    @eval begin
+
+        function hbmv!(uplo::Char,
+                       k::Integer,
+                       alpha::Number,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty},
+                       beta::Number,
+                       y::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
+            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
+            if n != length(x) || n != length(y) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            incy = stride(y,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, k, alpha, A, lda, x, incx, beta, y, incy)
+            y
+        end
+
+        function hbmv(uplo::Char, k::Integer, alpha::Number,
+                      A::oneStridedVecOrMat{$elty}, x::oneStridedVecOrMat{$elty})
+            n = size(A,2)
+            hbmv!(uplo, k, alpha, A, x, zero($elty), similar(x, $elty, n))
+        end
+
+        function hbmv(uplo::Char, k::Integer, A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            hbmv(uplo, k, one($elty), A, x)
+        end
+
+    end
+end
+
 # level 1
 ## nrm2
 for (fname, elty, ret_type) in

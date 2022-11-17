@@ -114,6 +114,30 @@ extern "C" void onemklZhemv(syclQueue_t device_queue, onemklUplo uplo, int64_t n
                                           reinterpret_cast<std::complex<double> *>(y), incy);
 }
 
+extern "C" void onemklChbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
+                            int64_t k, float _Complex alpha, const float _Complex *a,
+                            int64_t lda, const float _Complex *x, int64_t incx, float _Complex beta,
+                            float _Complex *y, int64_t incy) {
+    oneapi::mkl::blas::column_major::hbmv(device_queue->val, convert(uplo), n,
+                                          k, static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<float> *>(a),
+                                          lda, reinterpret_cast<const std::complex<float> *>(x),
+                                          incx, static_cast<std::complex<float> >(beta),
+                                          reinterpret_cast<std::complex<float> *>(y), incy);
+}
+
+extern "C" void onemklZhbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
+                            int64_t k, double _Complex alpha, const double _Complex *a,
+                            int64_t lda, const double _Complex *x, int64_t incx, double _Complex beta,
+                            double _Complex *y, int64_t incy) {
+    oneapi::mkl::blas::column_major::hbmv(device_queue->val, convert(uplo), n,
+                                          k, static_cast<std::complex<double> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(a),
+                                          lda, reinterpret_cast<const std::complex<double> *>(x),
+                                          incx, static_cast<std::complex<double> >(beta),
+                                          reinterpret_cast<std::complex<double> *>(y), incy);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

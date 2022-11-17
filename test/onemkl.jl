@@ -1,5 +1,5 @@
 using oneAPI
-using oneAPI.oneMKL
+using oneAPI.oneMKL: band, bandex
 
 using LinearAlgebra
 
@@ -89,5 +89,49 @@ end
             hy = Array(dy)
             @test y ≈ hy
         end
+
+        @testset "hbmv!" begin
+            A = rand(T,m,m)
+            A = A + A'
+            nbands = 3
+            @test m >= 1+nbands
+            A = bandex(A,nbands,nbands)
+            # convert to 'upper' banded storage format
+            AB = band(A,0,nbands)
+            # construct x
+            x = rand(T,m)
+            d_AB = oneArray(AB)
+            d_x = oneArray(x)
+
+            y = rand(T,m)
+            d_y = oneArray(y)
+            # hbmv!
+            oneMKL.hbmv!('U',nbands,alpha,d_AB,d_x,beta,d_y)
+            y = alpha*(A*x) + beta*y
+            # compare
+            h_y = Array(d_y)
+            @test y ≈ h_y
+        end
+
+        @testset "hbmv" begin
+            A = rand(T,m,m)
+            A = A + A'
+            nbands = 3
+            @test m >= 1+nbands
+            A = bandex(A,nbands,nbands)
+            # convert to 'upper' banded storage format
+            AB = band(A,0,nbands)
+            # construct x
+            x = rand(T,m)
+            d_AB = oneArray(AB)
+            d_x = oneArray(x)
+
+            d_y = oneMKL.hbmv('U',nbands,d_AB,d_x)
+            y = A*x
+            # compare
+            h_y = Array(d_y)
+            @test y ≈ h_y
+        end
+
     end
 end
