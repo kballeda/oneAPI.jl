@@ -129,7 +129,9 @@ end
 # tbmv
 ### tbmv, (TB) triangular banded matrix-vector multiplication
 for (fname, elty) in ((:onemklStbmv,:Float32),
-                      (:onemklDtbmv,:Float64))
+                      (:onemklDtbmv,:Float64),
+                      (:onemklCtbmv,:ComplexF32),
+                      (:onemklZtbmv,:ComplexF64))
     @eval begin
         function tbmv!(uplo::Char,
                        trans::Char,

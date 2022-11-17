@@ -113,6 +113,24 @@ extern "C" void onemklDtbmv(syclQueue_t device_queue, onemklUplo uplo,
                                           convert(diag), n, k, a, lda, x, incx);
 }
 
+extern "C" void onemklCtbmv(syclQueue_t device_queue, onemklUplo uplo,
+                            onemklTranspose trans, onemklDiag diag, int64_t n,
+                            int64_t k, const float _Complex *a, int64_t lda, float _Complex *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::tbmv(device_queue->val, convert(uplo), convert(trans),convert(diag),
+                                          n, k, reinterpret_cast<const std::complex<float> *>(a), lda,
+                                          reinterpret_cast<std::complex<float> *>(x), incx);
+}
+
+extern "C" void onemklZtbmv(syclQueue_t device_queue, onemklUplo uplo,
+                            onemklTranspose trans, onemklDiag diag, int64_t n,
+                            int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::tbmv(device_queue->val, convert(uplo), convert(trans), convert(diag), n, k,
+                                          reinterpret_cast<const std::complex<double> *>(a), lda,
+                                          reinterpret_cast<std::complex<double> *>(x), incx);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

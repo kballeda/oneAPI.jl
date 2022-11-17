@@ -40,7 +40,7 @@ end
 
 # level 2 tests
 @testset "level 2" begin
-    @testset for T in intersect(eltypes, [Float32, Float64])
+    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
         @testset "triangular" begin
              # generate triangular matrix
              A = rand(T,m,m)

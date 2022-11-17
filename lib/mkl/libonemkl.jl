@@ -66,6 +66,20 @@ function onemklDtbmv(device_queue, uplo, trans, diag, n, k, a, lda, x, incx)
                                          incx::Int64)::Cvoid
 end
 
+function onemklCtbmv(device_queue, uplo, trans, diag, n, k, a, lda, x, incx)
+    @ccall liboneapi_support.onemklCtbmv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         trans::onemklTranspose, diag::onemklDiag, n::Int64,
+                                         k::Int64, a::ZePtr{ComplexF32}, lda::Int64, x::ZePtr{ComplexF32},
+                                         incx::Int64)::Cvoid
+end
+
+function onemklZtbmv(device_queue, uplo, trans, diag, n, k, a, lda, x, incx)
+    @ccall liboneapi_support.onemklZtbmv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         trans::onemklTranspose, diag::onemklDiag, n::Int64,
+                                         k::Int64, a::ZePtr{ComplexF64}, lda::Int64, x::ZePtr{ComplexF64},
+                                         incx::Int64)::Cvoid
+end
+
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 
                                 n::Int64, x::ZePtr{Cdouble}, incx::Int64, 
