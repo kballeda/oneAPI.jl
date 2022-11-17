@@ -35,7 +35,6 @@ for (fname, elty) in ((:onemklChemv,:ComplexF32),
                        x::oneStridedVecOrMat{$elty},
                        beta::Number,
                        y::oneStridedVecOrMat{$elty})
-            # TODO: fix dimension check bug in julia
             m, n = size(A)
             if m != n throw(DimensionMismatch("Matrix A is $m by $n but must be square")) end
             if m != length(x) || m != length(y) throw(DimensionMismatch("")) end
