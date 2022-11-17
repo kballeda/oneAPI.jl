@@ -35,7 +35,9 @@ end
 # level 2
 # ger
 for (fname, elty) in ((:onemklSger, :Float32),
-                      (:onemklDger, :Float64))
+                      (:onemklDger, :Float64),
+                      (:onemklCgerc, :ComplexF32),
+                      (:onemklZgerc, :ComplexF64))
     @eval begin
         function ger!(alpha::Number,
                       x::oneStridedArray{$elty},

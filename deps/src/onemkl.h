@@ -47,6 +47,14 @@ void onemklDger(syclQueue_t device_queue, int64_t m, int64_t n, double alpha,
                 const double *x, int64_t incx, const double *y, int64_t incy, 
                 double *a, int64_t lda);
 
+void onemklCgerc(syclQueue_t device_queue, int64_t m, int64_t n, float _Complex alpha,
+                const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy, 
+                float _Complex *a, int64_t lda);
+
+void onemklZgerc(syclQueue_t device_queue, int64_t m, int64_t n, double _Complex alpha,
+                const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy, 
+                double _Complex *a, int64_t lda);
+
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                  int64_t incx, double *result);

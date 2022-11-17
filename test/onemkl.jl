@@ -39,7 +39,7 @@ m = 20
 end
 
 @testset "level 2" begin
-    @testset for T in intersect(eltypes, [Float32, Float64])
+    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
         alpha = rand(T)
         A = rand(T,m,m)
         x = rand(T,m)

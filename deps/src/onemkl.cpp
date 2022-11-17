@@ -93,6 +93,26 @@ extern "C" void onemklDger(syclQueue_t device_queue, int64_t m, int64_t n, doubl
     oneapi::mkl::blas::column_major::ger(device_queue->val, m, n, alpha, x, incx, y, incy, a, lda);
 }
 
+extern "C" void onemklCgerc(syclQueue_t device_queue, int64_t m, int64_t n, float _Complex alpha,
+                           const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
+                           float _Complex *a, int64_t lda) {
+    oneapi::mkl::blas::column_major::gerc(device_queue->val, m, n,
+                                          static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<float> *>(x), incx,
+                                          reinterpret_cast<const std::complex<float> *>(y), incy,
+                                          reinterpret_cast<std::complex<float> *>(a), lda);
+}
+
+extern "C" void onemklZgerc(syclQueue_t device_queue, int64_t m, int64_t n, double _Complex alpha,
+                           const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
+                           double _Complex *a, int64_t lda) {
+    oneapi::mkl::blas::column_major::gerc(device_queue->val, m, n,
+                                          static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(x), incx,
+                                          reinterpret_cast<const std::complex<double> *>(y), incy,
+                                          reinterpret_cast<std::complex<double> *>(a), lda);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);
