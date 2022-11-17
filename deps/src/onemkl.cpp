@@ -118,6 +118,16 @@ extern "C" void onemklDsymv(syclQueue_t device_queue, onemklUplo uplo, int64_t n
                                           x, incx, beta, y, incy);
 }
 
+extern "C" void onemklSsyr(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                           const float *x, int64_t incx, float *a, int64_t lda) {
+    oneapi::mkl::blas::column_major::syr(device_queue->val, convert(uplo), n, alpha, x, incx, a, lda);
+}
+
+extern "C" void onemklDsyr(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double alpha,
+                           const double *x, int64_t incx, double *a, int64_t lda) {
+    oneapi::mkl::blas::column_major::syr(device_queue->val, convert(uplo), n, alpha, x, incx, a, lda);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

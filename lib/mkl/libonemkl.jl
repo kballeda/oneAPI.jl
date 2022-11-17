@@ -75,6 +75,18 @@ function onemklDsymv(device_queue, uplo, n, alpha, a, lda, x, incx, beta, y, inc
                                          y::ZePtr{Cdouble}, incy::Int64)::Cvoid
 end
 
+function onemklSsyr(device_queue, uplo, n, alpha, x, incx, a, lda)
+    @ccall liboneapi_support.onemklSsyr(device_queue::syclQueue_t, uplo::onemklUplo,
+                                        n::Int64, alpha::Cfloat, x::ZePtr{Cfloat}, 
+                                        incx::Int64, a::ZePtr{Cfloat}, lda::Int64)::Cvoid
+end
+
+function onemklDsyr(device_queue, uplo, n, alpha, x, incx, a, lda)
+    @ccall liboneapi_support.onemklSsyr(device_queue::syclQueue_t, uplo::onemklUplo,
+                                        n::Int64, alpha::Cdouble, x::ZePtr{Cdouble}, 
+                                        incx::Int64, a::ZePtr{Cdouble}, lda::Int64)::Cvoid
+end
+
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 
                                 n::Int64, x::ZePtr{Cdouble}, incx::Int64, 

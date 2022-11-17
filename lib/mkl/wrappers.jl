@@ -109,7 +109,27 @@ for (fname, elty) in ((:onemklSsymv,:Float32),
         function symv(uplo::Char, A::oneStridedVecOrMat{$elty}, x::oneStridedVecOrMat{$elty})
             symv(uplo, one($elty), A, x)
         end
-        
+
+    end
+end
+
+# syr
+for (fname, elty) in ((:onemklSsyr,:Float32),
+                      (:onemklDsyr,:Float64))
+    @eval begin
+        function syr!(uplo::Char,
+                      alpha::Number,
+                      x::oneStridedVecOrMat{$elty},
+                      A::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            m == n || throw(DimensionMismatch("Matrix A is $m by $n but must be square"))
+            length(x) == n || throw(DimensionMismatch("Length of vector must be the same as the matrix dimensions"))
+            incx = stride(x,1)
+            lda = max(1,stride(A,2))
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, alpha, x, incx, A, lda)
+            A
+        end
     end
 end
 

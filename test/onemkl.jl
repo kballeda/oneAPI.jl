@@ -73,6 +73,7 @@ end
         @testset "symv tests" begin
             x = rand(T,m)
             sA = rand(T, m, m)
+            sA = sA + transpose(sA)
             dsA = oneArray(sA)
             dx = oneArray(x)
             @testset "symv!" begin
@@ -97,6 +98,22 @@ end
                 hy = Array(dy)
                 @test y ≈ hy
             end
+        end
+
+        @testset "syr!" begin
+            x = rand(T,m)
+            sA = rand(T, m, m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            dx = oneArray(x)
+            dB = copy(dsA)
+            oneMKL.syr!('U',alpha,dx,dB)
+            B = (alpha*x)*transpose(x) + sA
+            # move to host and compare upper triangles
+            hB = Array(dB)
+            B = triu(B)
+            hB = triu(hB)
+            @test B ≈ hB
         end
     end
 end
