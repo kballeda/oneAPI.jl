@@ -6,6 +6,11 @@ using CEnum
     ONEMLK_TRANSPOSE_CONJTRANS = 2
 end
 
+@cenum onemklUplo::UInt32 begin
+    ONEMKL_UPLO_UPPER = 0
+    ONEMKL_UPLO_LOWER = 1
+end
+
 function onemklSgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)
     @ccall liboneapi_support.onemklSgemm(device_queue::syclQueue_t, transA::onemklTranspose,
@@ -40,6 +45,20 @@ function onemklZgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ld
                                     alpha::ComplexF64, A::ZePtr{ComplexF64}, lda::Int64,
                                     B::ZePtr{ComplexF64}, ldb::Int64, beta::ComplexF64,
                                     C::ZePtr{ComplexF64}, ldc::Int64)::Cint
+end
+
+function onemklSsbmv(device_queue, uplo, n, k, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklSsbmv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, k::Int64, alpha::Cfloat, a::ZePtr{Cfloat},
+                                         lda::Int64, x::ZePtr{Cfloat}, incx::Int64, beta::Cfloat,
+                                         y::ZePtr{Cfloat}, incy::Int64)::Cvoid
+end
+
+function onemklDsbmv(device_queue, uplo, n, k, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklDsbmv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, k::Int64, alpha::Cdouble, a::ZePtr{Cdouble},
+                                         lda::Int64, x::ZePtr{Cdouble}, incx::Int64, beta::Cdouble,
+                                         y::ZePtr{Cdouble}, incy::Int64)::Cvoid
 end
 
 function onemklDnrm2(device_queue, n, x, incx, result)

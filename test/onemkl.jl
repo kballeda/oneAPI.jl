@@ -1,5 +1,5 @@
 using oneAPI
-using oneAPI.oneMKL
+using oneAPI.oneMKL: band, bandex
 
 using LinearAlgebra
 
@@ -34,6 +34,40 @@ m = 20
             oneMKL.swap!(m, dx, dy)
             @test Array(dx) == y
             @test Array(dy) == x
+        end
+    end
+end
+@testset "level 2" begin
+    @testset for T in intersect(eltypes, [Float32, Float64])
+        alpha = rand(T)
+        beta = rand(T)
+        A = rand(T,m,m)
+        A = A + A'
+        nbands = 3
+        @test m >= 1+nbands
+        A = bandex(A,nbands,nbands)
+        # convert to 'upper' banded storage format
+        AB = band(A,0,nbands)
+        # construct x
+        x = rand(T,m)
+        d_AB = oneArray(AB)
+        d_x = oneArray(x)
+        @testset "sbmv!" begin
+            y = rand(T,m)
+            d_y = oneArray(y)
+            # sbmv!
+            oneMKL.sbmv!('U',nbands,alpha,d_AB,d_x,beta,d_y)
+            y = alpha*(A*x) + beta*y
+            # compare
+            h_y = Array(d_y)
+            @test y ≈ h_y
+        end
+        @testset "sbmv" begin
+            d_y = oneMKL.sbmv('U',nbands,d_AB,d_x)
+            y = A*x
+            # compare
+            h_y = Array(d_y)
+            @test y ≈ h_y
         end
     end
 end

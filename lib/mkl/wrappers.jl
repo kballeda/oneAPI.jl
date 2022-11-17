@@ -14,6 +14,16 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+function Base.convert(::Type{onemklUplo}, uplo::Char)
+    if uplo == 'U'
+        return ONEMKL_UPLO_UPPER
+    elseif uplo == 'L'
+        return ONEMKL_UPLO_LOWER
+    else
+        throw(ArgumentError("Unknown uplo $uplo"))
+    end
+end
+
 # level 1
 ## nrm2
 for (fname, elty, ret_type) in
@@ -28,6 +38,45 @@ for (fname, elty, ret_type) in
             $fname(sycl_queue(queue), n, x, stride(x,1), result)            
             res = Array(result)
             return res[1]
+        end
+    end
+end
+
+# level 2
+# sbmv, symmetric banded matrix-vector multiplication
+for (fname, elty) in ((:onemklSsbmv, :Float32),
+                      (:onemklDsbmv, :Float64))
+    @eval begin
+        function sbmv!(uplo::Char,
+                       k::Integer,
+                       alpha::Number,
+                       a::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty},
+                       beta::Number,
+                       y::oneStridedVecOrMat{$elty})
+            m, n = size(a)
+            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
+            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
+            if n != length(x) || n != length(y) throw(DimensionMismatch("")) end
+            queue = global_queue(context(x), device(x))
+            lda = max(1, stride(a,2))
+            incx = stride(x,1)
+            incy = stride(y,1)
+            alpha = $elty(alpha)
+            beta = $elty(beta)
+            $fname(sycl_queue(queue), uplo, n, k, alpha, a, lda, x, incx, beta, y, incy)
+            y
+        end
+
+        function sbmv(uplo::Char, k::Integer, alpha::Number,
+                      a::oneStridedArray{$elty}, x::oneStridedArray{$elty})
+            n = size(a,2)
+            sbmv!(uplo, k, alpha, a, x, zero($elty), similar(x, $elty, n))
+        end
+
+        function sbmv(uplo::Char, k::Integer, a::oneStridedArray{$elty},
+                      x::oneStridedArray{$elty})
+            sbmv(uplo, k, one($elty), a, x)
         end
     end
 end

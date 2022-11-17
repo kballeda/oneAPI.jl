@@ -18,6 +18,15 @@ oneapi::mkl::transpose convert(onemklTranspose val) {
     }
 }
 
+oneapi::mkl::uplo convert(onemklUplo val) {
+    switch(val) {
+    case ONEMKL_UPLO_UPPER:
+        return oneapi::mkl::uplo::upper;
+    case ONEMKL_UPLO_LOWER:
+        return oneapi::mkl::uplo::lower;
+    }
+}
+
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                            onemklTranspose transB, int64_t m, int64_t n,
                            int64_t k, sycl::half alpha, const sycl::half *A, int64_t lda,
@@ -79,6 +88,20 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
         reinterpret_cast<const std::complex<double> *>(B), ldb, beta,
         reinterpret_cast<std::complex<double> *>(C), ldc);
     return 0;
+}
+
+extern "C" void onemklSsbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, int64_t k,
+                            float alpha, const float *a, int64_t lda, const float *x, 
+                            int64_t incx, float beta, float *y, int64_t incy) {
+    oneapi::mkl::blas::column_major::sbmv(device_queue->val, convert(uplo), n, k,
+                                          alpha, a, lda, x, incx, beta, y, incy);
+}
+
+extern "C" void onemklDsbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, int64_t k,
+                            double alpha, const double *a, int64_t lda, const double *x, 
+                            int64_t incx, double beta, double *y, int64_t incy) {
+    oneapi::mkl::blas::column_major::sbmv(device_queue->val, convert(uplo), n, k,
+                                          alpha, a, lda, x, incx, beta, y, incy);
 }
 
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
