@@ -196,6 +196,70 @@ for (fname, elty) in ((:onemklStbsv,:Float32),
     end
 end
 
+### trmv, Triangular matrix-vector multiplication
+for (fname, elty) in ((:onemklStrmv, :Float32),
+                      (:onemklDtrmv, :Float64),
+                      (:onemklCtrmv, :ComplexF32),
+                      (:onemklZtrmv, :ComplexF64))
+    @eval begin
+        function trmv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if m != n throw(DimensionMismatch("Matrix A is $m by $n but must be square")) end
+            if n != length(x)
+                throw(DimensionMismatch("length(x)=$(length(x)) does not match size(A)=$(size(A))"))
+            end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, A, lda, x, incx)
+            x
+        end
+
+        function trmv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            trmv!(uplo, trans, diag, A, copy(x))
+        end
+    end
+end
+
+### trsv, Triangular matrix-vector solve
+for (fname, elty) in ((:onemklStrsv, :Float32),
+                      (:onemklDtrsv, :Float64),
+                      (:onemklCtrsv, :ComplexF32),
+                      (:onemklZtrsv, :ComplexF64))
+    @eval begin
+        function trsv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if m != n throw(DimensionMismatch("Matrix A is $m by $n but must be square")) end
+            if n != length(x)
+                throw(DimensionMismatch("length(x)=$(length(x)) does not match size(A)=$(size(A))"))
+            end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, A, lda, x, incx)
+            x
+        end
+        function trsv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            trsv!(uplo, trans, diag, A, copy(x))
+        end
+    end
+end
 
 # level 3
 

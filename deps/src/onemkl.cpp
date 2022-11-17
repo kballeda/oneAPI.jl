@@ -163,6 +163,68 @@ extern "C" void onemklZtbsv(syclQueue_t device_queue, onemklUplo uplo,
                                           reinterpret_cast<std::complex<double> *>(x), incx);
 }
 
+// trmv - level2
+extern "C" void onemklStrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::trmv(device_queue->val, convert(uplo), convert(trans), convert(diag),
+                                          n, a, lda, x, incx);
+}
+
+extern "C" void onemklDtrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::trmv(device_queue->val, convert(uplo), convert(trans), convert(diag),
+                                          n, a, lda, x, incx);
+}
+
+extern "C" void onemklCtrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const float _Complex *a, int64_t lda, float _Complex *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::trmv(device_queue->val, convert(uplo), convert(trans), convert(diag),
+                                          n, reinterpret_cast<const std::complex<float> *>(a), lda,
+                                          reinterpret_cast<std::complex<float> *>(x), incx);
+}
+
+extern "C" void onemklZtrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda, double _Complex *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::trmv(device_queue->val, convert(uplo), convert(trans), convert(diag),
+                                          n, reinterpret_cast<const std::complex<double> *>(a), lda,
+                                          reinterpret_cast<std::complex<double> *>(x), incx);
+}
+
+// trsv
+extern "C" void onemklStrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::trsv(device_queue->val, convert(uplo), convert(trans), 
+                                          convert(diag), n, a, lda, x, incx);
+}
+
+extern "C" void onemklDtrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
+                            int64_t incx) {
+    oneapi::mkl::blas::column_major::trsv(device_queue->val, convert(uplo), convert(trans), 
+                                          convert(diag), n, a, lda, x, incx);
+}
+
+extern "C" void onemklCtrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const float  _Complex *a, int64_t lda,
+                            float _Complex *x, int64_t incx) {
+    oneapi::mkl::blas::column_major::trsv(device_queue->val, convert(uplo), convert(trans), 
+                                          convert(diag), n, reinterpret_cast<const std::complex<float> *>(a),
+                                          lda, reinterpret_cast<std::complex<float> *>(x), incx);
+}
+
+extern "C" void onemklZtrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                            onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda,
+                            double _Complex *x, int64_t incx) {
+    oneapi::mkl::blas::column_major::trsv(device_queue->val, convert(uplo), convert(trans), 
+                                          convert(diag), n, reinterpret_cast<const std::complex<double> *>(a),
+                                          lda, reinterpret_cast<std::complex<double> *>(x), incx);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

@@ -124,6 +124,99 @@ end
                 h_y = Array(d_y)
                 @test y ≈ h_y
             end
+
+            
+            @testset "trmv!" begin
+                sA = rand(T,m,m)
+                sA = sA + transpose(sA)
+                A = triu(sA)
+                dA = oneArray(A)
+                x = rand(T, m)
+                dx = oneArray(x)
+                d_y = copy(dx)
+                # execute trmv!
+                oneMKL.trmv!('U','N','N',dA,d_y)
+                y = A*x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+                #@test_throws DimensionMismatch oneMKL.trmv!('U','N','N',dA, rand(T,m+1))
+            end
+
+            @testset "trmv" begin
+                sA = rand(T,m,m)
+                sA = sA + transpose(sA)
+                A = triu(sA)
+                dA = oneArray(A) 
+                x = rand(T, m)
+                dx = oneArray(x)
+                d_y = copy(dx)
+                d_y = oneMKL.trmv('U','N','N',dA,dx)
+                y = A*x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+
+            @testset "trsv!" begin
+                sA = rand(T,m,m)
+                sA = sA + transpose(sA)
+                A = triu(sA)
+                dA = oneArray(A) 
+                x = rand(T, m)
+                dx = oneArray(x)
+                d_y = copy(dx)
+                # execute trsv!
+                oneMKL.trsv!('U','N','N',dA,d_y)
+                y = A\x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+                #@test_throws DimensionMismatch CUBLAS.trsv!('U','N','N',dA,CUDA.rand(elty,m+1))
+            end
+    
+            @testset "trsv" begin
+                sA = rand(T,m,m)
+                sA = sA + transpose(sA)
+                A = triu(sA)
+                dA = oneArray(A) 
+                x = rand(T, m)
+                dx = oneArray(x)
+                d_y = oneMKL.trsv('U','N','N',dA,dx)
+                y = A\x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+
+            @testset "trsv (adjoint)" begin
+                sA = rand(T,m,m)
+                sA = sA + transpose(sA)
+                A = triu(sA)
+                dA = oneArray(A) 
+                x = rand(T, m)
+                dx = oneArray(x)
+                d_y = oneMKL.trsv('U','C','N',dA,dx)
+                y = adjoint(A)\x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+
+            @testset "trsv (transpose)" begin
+                sA = rand(T,m,m)
+                sA = sA + transpose(sA)
+                A = triu(sA)
+                dA = oneArray(A) 
+                x = rand(T, m)
+                dx = oneArray(x)
+                d_y = oneMKL.trsv('U','T','N',dA,dx)
+                y = transpose(A)\x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+
         end
     end
 end

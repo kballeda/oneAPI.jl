@@ -85,6 +85,39 @@ void onemklZtbsv(syclQueue_t device_queue, onemklUplo uplo,
                 int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
                 int64_t incx);
 
+void onemklStrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
+                int64_t incx);
+
+void onemklDtrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
+                int64_t incx);
+
+void onemklCtrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const float _Complex *a, int64_t lda, float _Complex *x,
+                int64_t incx);
+
+void onemklZtrmv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda, double _Complex *x,
+                int64_t incx);
+
+// trsv
+void onemklStrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
+                int64_t incx);
+
+void onemklDtrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
+                int64_t incx);
+
+void onemklCtrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const float _Complex *a, int64_t lda, float _Complex *x,
+                int64_t incx);
+
+void onemklZtrsv(syclQueue_t device_queue, onemklUplo uplo, onemklTranspose trans,
+                onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda, double _Complex *x,
+                int64_t incx);
+
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                  int64_t incx, double *result);
