@@ -18,6 +18,24 @@ oneapi::mkl::transpose convert(onemklTranspose val) {
     }
 }
 
+oneapi::mkl::uplo convert(onemklUplo val) {
+    switch(val) {
+        case ONEMKL_UPLO_UPPER:
+            return oneapi::mkl::uplo::upper;
+        case ONEMKL_UPLO_LOWER:
+            return oneapi::mkl::uplo::lower;
+    }
+}
+
+oneapi::mkl::diag convert(onemklDiag val) {
+    switch(val) {
+        case ONEMKL_DIAG_NONUNIT:
+            return oneapi::mkl::diag::nonunit;
+        case ONEMKL_DIAG_UNIT:
+            return oneapi::mkl::diag::unit;
+    }
+}
+
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                            onemklTranspose transB, int64_t m, int64_t n,
                            int64_t k, sycl::half alpha, const sycl::half *A, int64_t lda,
@@ -79,6 +97,20 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
         reinterpret_cast<const std::complex<double> *>(B), ldb, beta,
         reinterpret_cast<std::complex<double> *>(C), ldc);
     return 0;
+}
+
+extern "C" void onemklStbmv(syclQueue_t device_queue, onemklUplo uplo,
+                            onemklTranspose trans, onemklDiag diag, int64_t n,
+                            int64_t k, const float *a, int64_t lda, float *x, int64_t incx) {
+    oneapi::mkl::blas::column_major::tbmv(device_queue->val, convert(uplo), convert(trans),
+                                          convert(diag), n, k, a, lda, x, incx);
+}
+
+extern "C" void onemklDtbmv(syclQueue_t device_queue, onemklUplo uplo,
+                            onemklTranspose trans, onemklDiag diag, int64_t n,
+                            int64_t k, const double *a, int64_t lda, double *x, int64_t incx) {
+    oneapi::mkl::blas::column_major::tbmv(device_queue->val, convert(uplo), convert(trans),
+                                          convert(diag), n, k, a, lda, x, incx);
 }
 
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 

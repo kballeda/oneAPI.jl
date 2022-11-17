@@ -14,6 +14,26 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+function Base.convert(::Type{onemklUplo}, uplo::Char)
+    if uplo == 'U'
+        return ONEMKL_UPLO_UPPER
+    elseif uplo == 'L'
+        return ONEMKL_UPLO_LOWER
+    else
+        throw(ArgumentError("Unknown transpose $uplo"))
+    end
+end
+
+function Base.convert(::Type{onemklDiag}, diag::Char)
+    if diag == 'N'
+        return ONEMKL_DIAG_NONUNIT
+    elseif diag == 'U'
+        return ONEMKL_DIAG_UNIT
+    else
+        throw(ArgumentError("Unknown transpose $diag"))
+    end
+end
+
 # level 1
 ## nrm2
 for (fname, elty, ret_type) in
@@ -101,6 +121,40 @@ for (fname, elty) in ((:onemklSswap,:Float32),
             queue = global_queue(context(x), device(x))
             $fname(sycl_queue(queue), n, x, stride(x, 1), y, stride(y, 1))
             x, y
+        end
+    end
+end
+
+# level 2
+# tbmv
+### tbmv, (TB) triangular banded matrix-vector multiplication
+for (fname, elty) in ((:onemklStbmv,:Float32),
+                      (:onemklDtbmv,:Float64))
+    @eval begin
+        function tbmv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       k::Integer,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
+            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
+            if n != length(x) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, k, A, lda, x, incx)
+            x
+        end
+
+        function tbmv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      k::Integer,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            tbmv!(uplo, trans, diag, k, A, copy(x))
         end
     end
 end
