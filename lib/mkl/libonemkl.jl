@@ -61,6 +61,20 @@ function onemklDsbmv(device_queue, uplo, n, k, alpha, a, lda, x, incx, beta, y, 
                                          y::ZePtr{Cdouble}, incy::Int64)::Cvoid
 end
 
+function onemklSsymv(device_queue, uplo, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklSsymv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::Cfloat, a::ZePtr{Cfloat},
+                                         lda::Int64, x::ZePtr{Cfloat}, incx::Int64, beta::Cfloat,
+                                         y::ZePtr{Cfloat}, incy::Int64)::Cvoid
+end
+
+function onemklDsymv(device_queue, uplo, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklDsymv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::Cdouble, a::ZePtr{Cdouble},
+                                         lda::Int64, x::ZePtr{Cdouble}, incx::Int64, beta::Cdouble,
+                                         y::ZePtr{Cdouble}, incy::Int64)::Cvoid
+end
+
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 
                                 n::Int64, x::ZePtr{Cdouble}, incx::Int64, 

@@ -81,6 +81,38 @@ for (fname, elty) in ((:onemklSsbmv, :Float32),
     end
 end
 
+#symv
+for (fname, elty) in ((:onemklSsymv,:Float32),
+                      (:onemklDsymv,:Float64))
+    # Note that the complex symv are not BLAS but auiliary functions in LAPACK
+    @eval begin
+        function symv!(uplo::Char,
+                       alpha::Number,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty},
+                       beta::Number,
+                       y::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if m != n throw(DimensionMismatch("Matrix A is $m by $n but must be square")) end
+            if m != length(x) || m != length(y) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            incy = stride(y,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, alpha, A, lda, x, incx, beta, y, incy)
+            y
+        end
+
+        function symv(uplo::Char, alpha::Number, A::oneStridedVecOrMat{$elty}, x::oneStridedVecOrMat{$elty})
+                symv!(uplo, alpha, A, x, zero($elty), similar(x))
+        end
+        function symv(uplo::Char, A::oneStridedVecOrMat{$elty}, x::oneStridedVecOrMat{$elty})
+            symv(uplo, one($elty), A, x)
+        end
+        
+    end
+end
+
 #
 # BLAS
 #

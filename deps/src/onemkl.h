@@ -52,6 +52,14 @@ void onemklDsbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, int64_t k
                  double alpha, const double *a, int64_t lda, const double *x, 
                  int64_t incx, double beta, double *y, int64_t incy);
 
+void onemklSsymv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                 const float *a, int64_t lda, const float *x, int64_t incx, float beta,
+                 float *y, int64_t incy);
+
+void onemklDsymv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
+                 double alpha, const double *a, int64_t lda, const double *x, 
+                 int64_t incx, double beta, double *y, int64_t incy);
+
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                  int64_t incx, double *result);

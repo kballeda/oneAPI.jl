@@ -69,5 +69,34 @@ end
             h_y = Array(d_y)
             @test y ≈ h_y
         end
+
+        @testset "symv tests" begin
+            x = rand(T,m)
+            sA = rand(T, m, m)
+            dsA = oneArray(sA)
+            dx = oneArray(x)
+            @testset "symv!" begin
+                # generate vectors
+                y = rand(T,m)
+                # copy to device
+                dy = oneArray(y)
+                # execute on host
+                BLAS.symv!('U',alpha,sA,x,beta,y)
+                # execute on device
+                oneMKL.symv!('U',alpha,dsA,dx,beta,dy)
+                # compare results
+                hy = Array(dy)
+                @test y ≈ hy
+            end
+
+            @testset "symv" begin
+                y = BLAS.symv('U',sA,x)
+                # execute on device
+                dy = oneMKL.symv('U',dsA,dx)
+                # compare results
+                hy = Array(dy)
+                @test y ≈ hy
+            end
+        end
     end
 end
