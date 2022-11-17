@@ -57,6 +57,34 @@ void onemklDtbmv(syclQueue_t device_queue, onemklUplo uplo,
                 onemklTranspose trans, onemklDiag diag, int64_t n,
                 int64_t k, const double *a, int64_t lda, double *x, int64_t incx);
 
+void onemklCtbmv(syclQueue_t device_queue, onemklUplo uplo,
+                onemklTranspose trans, onemklDiag diag, int64_t n,
+                int64_t k, const float _Complex *a, int64_t lda, float _Complex *x,
+                int64_t incx);
+
+void onemklZtbmv(syclQueue_t device_queue, onemklUplo uplo,
+                onemklTranspose trans, onemklDiag diag, int64_t n,
+                int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
+                int64_t incx);
+
+void onemklStbsv(syclQueue_t device_queue, onemklUplo uplo,
+                onemklTranspose trans, onemklDiag diag, int64_t n,
+                int64_t k, const float *a, int64_t lda, float *x, int64_t incx);
+
+void onemklDtbsv(syclQueue_t device_queue, onemklUplo uplo,
+                onemklTranspose trans, onemklDiag diag, int64_t n,
+                int64_t k, const double *a, int64_t lda, double *x, int64_t incx);
+
+void onemklCtbsv(syclQueue_t device_queue, onemklUplo uplo,
+                onemklTranspose trans, onemklDiag diag, int64_t n,
+                int64_t k, const float _Complex *a, int64_t lda, float _Complex *x,
+                int64_t incx);
+
+void onemklZtbsv(syclQueue_t device_queue, onemklUplo uplo,
+                onemklTranspose trans, onemklDiag diag, int64_t n,
+                int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
+                int64_t incx);
+
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                  int64_t incx, double *result);
