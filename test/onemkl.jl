@@ -4,6 +4,8 @@ using oneAPI.oneMKL
 using LinearAlgebra
 
 m = 20
+n = 35
+k = 13
 
 ############################################################################################
 @testset "level 1" begin
@@ -37,3 +39,35 @@ m = 20
         end
     end
 end
+
+@testset "level 2" begin
+    @testset for T in intersect(eltypes, [ComplexF32, ComplexF64])
+        alpha = rand(T)
+        beta = rand(T)
+        B = rand(T,m,n)
+        C = rand(T,m,n)
+        d_B = oneArray(B)
+        d_C = oneArray(C)
+        hA = rand(T,m,m)
+        hA = hA + hA'
+        dhA = oneArray(hA)
+        @testset "hemm!" begin
+            # compute
+            C = alpha*(hA*B) + beta*C
+            oneMKL.hemm!('L','L',alpha,dhA,d_B,beta,d_C)
+            # move to host and compare
+            h_C = Array(d_C)
+            @test C ≈ h_C
+        end
+
+        @testset "hemm" begin
+            C = hA*B
+            d_C = oneMKL.hemm('L','U',dhA,d_B)
+            # move to host and compare
+            h_C = Array(d_C)
+            @test C ≈ h_C
+        end
+
+    end
+end
+

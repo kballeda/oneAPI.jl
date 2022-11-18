@@ -15,6 +15,17 @@ typedef enum {
     ONEMLK_TRANSPOSE_CONJTRANS
 } onemklTranspose;
 
+typedef enum {
+    ONEMKL_UPLO_UPPER,
+    ONEMKL_UPLO_LOWER
+} onemklUplo;
+
+typedef enum {
+    ONEMKL_SIDE_LEFT,
+    ONEMKL_SIDE_RIGHT
+} onemklSide;
+
+
 // XXX: how to expose half in C?
 // int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
 //                onemklTranspose transB, int64_t m, int64_t n, int64_t k,
@@ -38,6 +49,18 @@ int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
                 double _Complex alpha, const double _Complex *A, int64_t lda,
                 const double _Complex *B, int64_t ldb, double _Complex beta,
                 double _Complex *C, int64_t ldc);
+
+void onemklChemm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo upper_lower, int64_t m, int64_t n, 
+                            float _Complex alpha, const float _Complex *a,
+                            int64_t lda, const float _Complex *b, int64_t ldb,
+                            float _Complex beta, float _Complex *c, int64_t ldc);
+
+void onemklZhemm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo upper_lower, int64_t m, int64_t n, 
+                            double _Complex alpha, const double _Complex *a,
+                            int64_t lda, const double _Complex *b, int64_t ldb,
+                            double _Complex beta, double _Complex *c, int64_t ldc);
 
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
