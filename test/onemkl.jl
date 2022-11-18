@@ -41,7 +41,7 @@ k = 13
 end
 
 @testset "level 3" begin
-    @testset for T in intersect(eltypes, [Float32, Float64])
+    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
         alpha = rand(T)
         beta = rand(T)
         B = rand(T,m,n)

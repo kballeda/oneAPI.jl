@@ -36,7 +36,9 @@ end
 
 ## (L3: symm) symmetric matrix-matrix and matrix-vector multiplication
 for (fname, elty) in ((:onemklSsymm, :Float32),
-                      (:onemklDsymm, :Float64))
+                      (:onemklDsymm, :Float64),
+                      (:onemklCsymm, :ComplexF32),
+                      (:onemklZsymm, :ComplexF64))
     @eval begin
         function symm!(side::Char,
                        uplo::Char,
