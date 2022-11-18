@@ -127,6 +127,26 @@ extern "C" void onemklZhemm(syclQueue_t device_queue, onemklSide left_right,
                                           reinterpret_cast<std::complex<double> *>(c), ldc);
 }
 
+extern "C" void onemklCherk(syclQueue_t device_queue, onemklUplo upper_lower,
+                            onemklTranspose trans, int64_t n, int64_t k, float alpha,
+                            const float _Complex *a, int64_t lda, float beta,
+                            float _Complex *c, int64_t ldc) {
+    oneapi::mkl::blas::column_major::herk(device_queue->val, convert(upper_lower),
+                                          convert(trans), n, k, alpha,
+                                          reinterpret_cast<const std::complex<float> *>(a),
+                                          lda, beta, reinterpret_cast<std::complex<float> *>(c), ldc);
+}
+
+extern "C" void onemklZherk(syclQueue_t device_queue, onemklUplo upper_lower,
+                            onemklTranspose trans, int64_t n, int64_t k, double alpha,
+                            const double _Complex *a, int64_t lda, double beta,
+                            double _Complex *c, int64_t ldc) {
+    oneapi::mkl::blas::column_major::herk(device_queue->val, convert(upper_lower),
+                                          convert(trans), n, k, alpha,
+                                          reinterpret_cast<const std::complex<double> *>(a),
+                                          lda, beta, reinterpret_cast<std::complex<double> *>(c), ldc);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);
