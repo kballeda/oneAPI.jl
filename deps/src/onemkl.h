@@ -89,6 +89,24 @@ void onemklZsyrk(syclQueue_t device_queue, onemklUplo upper_lower,
                 const double _Complex *a, int64_t lda, double _Complex beta, double _Complex *c,
                 int64_t ldc);
 
+void onemklSsyr2k(syclQueue_t device_queue, onemklUplo upper_lower, onemklTranspose trans,
+                int64_t n, int64_t k, float alpha, const float *a, int64_t lda,
+                const float *b, int64_t ldb, float beta, float *c, int64_t ldc);
+
+void onemklDsyr2k(syclQueue_t device_queue, onemklUplo upper_lower, onemklTranspose trans,
+                int64_t n, int64_t k, double alpha, const double *a, int64_t lda,
+                const double *b, int64_t ldb, float beta, double *c, int64_t ldc);
+
+void onemklCsyr2k(syclQueue_t device_queue, onemklUplo upper_lower, onemklTranspose trans,
+                int64_t n, int64_t k, float _Complex alpha, const float _Complex *a,
+                int64_t lda, const float _Complex *b, int64_t ldb, float _Complex beta,
+                float _Complex *c, int64_t ldc);
+
+void onemklZsyr2k(syclQueue_t device_queue, onemklUplo upper_lower, onemklTranspose trans,
+                int64_t n, int64_t k, double _Complex alpha, const double _Complex *a,
+                int64_t lda, const double _Complex *b, int64_t ldb, double _Complex beta,
+                float _Complex *c, int64_t ldc);
+
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                  int64_t incx, double *result);
