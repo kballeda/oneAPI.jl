@@ -18,6 +18,33 @@ oneapi::mkl::transpose convert(onemklTranspose val) {
     }
 }
 
+oneapi::mkl::uplo convert(onemklUplo val) {
+    switch(val) {
+    case ONEMKL_UPLO_UPPER:
+        return oneapi::mkl::uplo::upper;
+    case ONEMKL_UPLO_LOWER:
+        return oneapi::mkl::uplo::lower;
+    }
+}
+
+oneapi::mkl::diag convert(onemklDiag val) {
+    switch(val) {
+        case ONEMKL_DIAG_NONUNIT:
+            return oneapi::mkl::diag::nonunit;
+        case ONEMKL_DIAG_UNIT:
+            return oneapi::mkl::diag::unit;
+    }
+}
+
+oneapi::mkl::side convert(onemklSide val) {
+    switch (val) {
+    case ONEMKL_SIDE_LEFT:
+        return oneapi::mkl::side::left;
+    case ONEMKL_SIDE_RIGHT:
+        return oneapi::mkl::side::right;
+    }
+}
+
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                            onemklTranspose transB, int64_t m, int64_t n,
                            int64_t k, sycl::half alpha, const sycl::half *A, int64_t lda,
@@ -79,6 +106,47 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
         reinterpret_cast<const std::complex<double> *>(B), ldb, beta,
         reinterpret_cast<std::complex<double> *>(C), ldc);
     return 0;
+}
+
+extern "C" void onemklStrmm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo uppler_lower, onemklTranspose trans,
+                            onemklDiag diag, int64_t m, int64_t n, float alpha,
+                            const float *a, int64_t lda, float *b, int64_t ldb) {
+    oneapi::mkl::blas::column_major::trmm(device_queue->val, convert(left_right),
+                                          convert(uppler_lower), convert(trans),
+                                          convert(diag), m, n, alpha, a, lda, b, ldb);
+}
+
+extern "C" void onemklDtrmm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo uppler_lower, onemklTranspose trans,
+                            onemklDiag diag, int64_t m, int64_t n, double alpha,
+                            const double *a, int64_t lda, double *b, int64_t ldb) {
+    oneapi::mkl::blas::column_major::trmm(device_queue->val, convert(left_right),
+                                          convert(uppler_lower), convert(trans),
+                                          convert(diag), m, n, alpha, a, lda, b, ldb);
+}
+
+extern "C" void onemklCtrmm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo uppler_lower, onemklTranspose trans,
+                            onemklDiag diag, int64_t m, int64_t n, float _Complex alpha,
+                            const float _Complex *a, int64_t lda, float _Complex *b,
+                            int64_t ldb) {
+    oneapi::mkl::blas::column_major::trmm(device_queue->val, convert(left_right),
+                                          convert(uppler_lower), convert(trans),
+                                          convert(diag), m, n, static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<float> *>(a), lda,
+                                          reinterpret_cast<std::complex<float> *>(b), ldb);
+}
+
+extern "C" void onemklZtrmm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo uppler_lower, onemklTranspose trans,
+                            onemklDiag diag, int64_t m, int64_t n, double _Complex alpha,
+                            const double _Complex *a, int64_t lda, double _Complex *b, int64_t ldb) {
+    oneapi::mkl::blas::column_major::trmm(device_queue->val, convert(left_right),
+                                          convert(uppler_lower), convert(trans),
+                                          convert(diag), m, n, static_cast<std::complex<double> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(a), lda,
+                                          reinterpret_cast<std::complex<double> *>(b), ldb);
 }
 
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
