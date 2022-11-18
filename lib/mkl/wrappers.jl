@@ -63,15 +63,12 @@ for (fname, elty, ret_type) in
 end
 
 ## (TR) Triangular matrix and vector multiplication and solution
-for (mmname, elty) in
-        ((:onemklDtrmm,:Float64),
-         (:onemklStrmm,:Float32),
-         (:onemklZtrmm,:ComplexF64),
-         (:onemklCtrmm,:ComplexF32))
+for (mmname, smname, elty) in
+        ((:onemklDtrmm, :onemklDtrsm, :Float64),
+         (:onemklStrmm, :onemklStrsm, :Float32),
+         (:onemklZtrmm, :onemklZtrsm, :ComplexF64),
+         (:onemklCtrmm, :onemklCtrsm, :ComplexF32))
     @eval begin
-        # Note: onemkl differs from BLAS API for trmm
-        #   BLAS: inplace modification of B
-        #   onemkl: store result in C
         function trmm!(side::Char,
                        uplo::Char,
                        transa::Char,
@@ -81,7 +78,6 @@ for (mmname, elty) in
                        B::oneStridedMatrix{$elty})
             m, n = size(B)
             mA, nA = size(A)
-            # TODO: clean up error messages
             if mA != nA throw(DimensionMismatch("A must be square")) end
             if nA != (side == 'L' ? m : n) throw(DimensionMismatch("trmm!")) end
             lda = max(1,stride(A,2))
@@ -90,6 +86,7 @@ for (mmname, elty) in
             $mmname(sycl_queue(queue), side, uplo, transa, diag, m, n, alpha, A, lda, B, ldb)
             B
         end
+
         function trmm(side::Char,
                       uplo::Char,
                       transa::Char,
@@ -99,7 +96,7 @@ for (mmname, elty) in
                       B::oneStridedMatrix{$elty})
             trmm!(side, uplo, transa, diag, alpha, A, B)
         end
-        #=function trsm!(side::Char,
+        function trsm!(side::Char,
                        uplo::Char,
                        transa::Char,
                        diag::Char,
@@ -108,14 +105,15 @@ for (mmname, elty) in
                        B::oneStridedMatrix{$elty})
             m, n = size(B)
             mA, nA = size(A)
-            # TODO: clean up error messages
             if mA != nA throw(DimensionMismatch("A must be square")) end
             if nA != (side == 'L' ? m : n) throw(DimensionMismatch("trsm!")) end
             lda = max(1,stride(A,2))
             ldb = max(1,stride(B,2))
-            $smname(handle(), side, uplo, transa, diag, m, n, alpha, A, lda, B, ldb)
+            queue = global_queue(context(A), device(A))
+            $smname(sycl_queue(queue), side, uplo, transa, diag, m, n, alpha, A, lda, B, ldb)
             B
         end
+
         function trsm(side::Char,
                       uplo::Char,
                       transa::Char,
@@ -124,7 +122,7 @@ for (mmname, elty) in
                       A::oneStridedMatrix{$elty},
                       B::oneStridedMatrix{$elty})
             trsm!(side, uplo, transa, diag, alpha, A, copy(B))
-        end=#
+        end
     end
 end
 
