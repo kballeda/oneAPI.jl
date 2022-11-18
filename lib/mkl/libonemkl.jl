@@ -6,6 +6,16 @@ using CEnum
     ONEMLK_TRANSPOSE_CONJTRANS = 2
 end
 
+@cenum onemklUplo::UInt32 begin
+    ONEMKL_UPLO_UPPER = 0
+    ONEMKL_UPLO_LOWER = 1
+end
+
+@cenum onemklSide::UInt32 begin
+    ONEMKL_SIDE_LEFT = 0
+    ONEMKL_SIDE_RIGHT = 1
+end
+
 function onemklSgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)
     @ccall liboneapi_support.onemklSgemm(device_queue::syclQueue_t, transA::onemklTranspose,
@@ -41,6 +51,23 @@ function onemklZgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ld
                                     B::ZePtr{ComplexF64}, ldb::Int64, beta::ComplexF64,
                                     C::ZePtr{ComplexF64}, ldc::Int64)::Cint
 end
+
+function onemklSsymm(device_queue, left_right, upper_lower, m, n, alpha, a, lda, b, ldb, beta,
+                     c, ldc) 
+    @ccall liboneapi_support.onemklSsymm(device_queue::syclQueue_t, left_right::onemklSide,
+                                         upper_lower::onemklUplo, m::Int64, n::Int64, alpha::Cfloat,
+                                         a::ZePtr{Cfloat}, lda::Int64, b::ZePtr{Cfloat}, ldb::Int64,
+                                         beta::Cfloat, c::ZePtr{Cfloat}, ldc::Int64)::Cvoid
+end
+
+function onemklDsymm(device_queue, left_right, upper_lower, m, n, alpha, a, lda, b, ldb, beta,
+                    c, ldc) 
+    @ccall liboneapi_support.onemklSsymm(device_queue::syclQueue_t, left_right::onemklSide,
+                                        upper_lower::onemklUplo, m::Int64, n::Int64, alpha::Cdouble,
+                                        a::ZePtr{Cdouble}, lda::Int64, b::ZePtr{Cdouble}, ldb::Int64,
+                                        beta::Cdouble, c::ZePtr{Cdouble}, ldc::Int64)::Cvoid
+end
+
 
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 

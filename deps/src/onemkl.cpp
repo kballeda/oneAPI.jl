@@ -18,6 +18,24 @@ oneapi::mkl::transpose convert(onemklTranspose val) {
     }
 }
 
+oneapi::mkl::side convert(onemklSide val) {
+    switch (val) {
+    case ONEMKL_SIDE_LEFT:
+        return oneapi::mkl::side::left;
+    case ONEMKL_SIDE_RIGHT:
+        return oneapi::mkl::side::right;
+    }
+}
+
+oneapi::mkl::uplo convert(onemklUplo val) {
+    switch(val) {
+    case ONEMKL_UPLO_UPPER:
+        return oneapi::mkl::uplo::upper;
+    case ONEMKL_UPLO_LOWER:
+        return oneapi::mkl::uplo::lower;
+    }
+}
+
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                            onemklTranspose transB, int64_t m, int64_t n,
                            int64_t k, sycl::half alpha, const sycl::half *A, int64_t lda,
@@ -79,6 +97,24 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
         reinterpret_cast<const std::complex<double> *>(B), ldb, beta,
         reinterpret_cast<std::complex<double> *>(C), ldc);
     return 0;
+}
+
+extern "C" void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo upper_lower, int64_t m, int64_t n,
+                            float alpha, const float *a, int64_t lda, const float *b,
+                            int64_t ldb, float beta, float *c, int64_t ldc) {
+    oneapi::mkl::blas::column_major::symm(device_queue->val, convert(left_right),
+                                          convert(upper_lower), m, n, alpha, a, lda, b,
+                                          ldb, beta, c, ldc);
+}
+
+extern "C" void onemklDsymm(syclQueue_t device_queue, onemklSide left_right,
+                            onemklUplo upper_lower, int64_t m, int64_t n,
+                            double alpha, const double *a, int64_t lda, const double *b,
+                            int64_t ldb, double beta, double *c, int64_t ldc) {
+    oneapi::mkl::blas::column_major::symm(device_queue->val, convert(left_right),
+                                          convert(upper_lower), m, n, alpha, a, lda, b,
+                                          ldb, beta, c, ldc);
 }
 
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
