@@ -15,6 +15,42 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
 end
 
 # level 1
+## axpy primitive
+for (fname, elty) in 
+        ((:onemklDaxpy,:Float64),
+         (:onemklSaxpy,:Float32),
+         (:onemklZaxpy,:ComplexF64),
+         (:onemklCaxpy,:ComplexF32))
+    @eval begin
+        function axpy!(n::Integer,
+                       alpha::Number,
+                       x::oneStridedArray{$elty},
+                       y::oneStridedArray{$elty})
+            queue = global_queue(context(x), device(x))
+            alpha = $elty(alpha)
+            $fname(sycl_queue(queue), n, alpha, x, stride(x,1), y, stride(y,1))
+            y
+        end
+    end
+end
+
+## scal
+for (fname, elty) in
+    ((:onemklDscal,:Float64),
+     (:onemklSscal,:Float32),
+     (:onemklZscal,:ComplexF64),
+     (:onemklCscal,:ComplexF32))
+    @eval begin
+        function scal!(n::Integer,
+                       alpha::$elty,
+                       x::oneStridedArray{$elty})
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), n, alpha, x, stride(x,1))
+            x
+        end
+    end
+end
+
 ## nrm2
 for (fname, elty, ret_type) in
     ((:onemklDnrm2, :Float64,:Float64),
@@ -53,6 +89,18 @@ for (jname, fname, elty) in
     end
 end
 
+for (fname, elty, celty) in ((:onemklCsscal, :Float32, :ComplexF32),
+                             (:onemklZdscal, :Float64, :ComplexF64))
+    @eval begin
+        function scal!(n::Integer, 
+                       alpha::$elty,
+                       x::oneStridedArray{$celty})
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), n, alpha, x, stride(x,1))
+        end
+    end
+end
+
 #
 # BLAS
 #
@@ -66,11 +114,29 @@ for (fname, elty) in
          (:onemklCcopy,:ComplexF32))
     @eval begin
         function copy!(n::Integer,
-                       x::StridedArray{$elty},
-                       y::StridedArray{$elty})
+                       x::oneStridedArray{$elty},
+                       y::oneStridedArray{$elty})
             queue = global_queue(context(x), device(x))
             $fname(sycl_queue(queue), n, x, stride(x, 1), y, stride(y, 1))
             y
+        end
+    end
+end
+
+## asum
+for (fname, elty, ret_type) in 
+    ((:onemklSasum, :Float32, :Float32),
+     (:onemklDasum, :Float64, :Float64),
+     (:onemklCasum, :ComplexF32, :Float32),
+     (:onemklZasum, :ComplexF64, :Float64))
+    @eval begin
+        function asum(n::Integer,
+                      x::oneStridedArray{$elty})
+            result = oneArray{$ret_type}([0])
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), n, x, stride(x, 1), result)
+            res = Array(result)
+            return res[1]
         end
     end
 end

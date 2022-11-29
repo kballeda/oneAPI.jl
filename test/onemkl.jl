@@ -13,6 +13,32 @@ m = 20
             B = oneArray{T}(undef, m)
             oneMKL.copy!(m,A,B)
             @test Array(A) == Array(B)
+        end 
+
+        @testset "axpy" begin
+            alpha = rand(T,1)
+            @test testf(axpy!, alpha[1], rand(T,m), rand(T,m))
+        end
+        
+        @testset "scal" begin
+            # Test scal primitive [alpha/x: F32, F64, CF32, CF64]
+            alpha = rand(T,1)
+            @test testf(rmul!, rand(T,m), alpha[1])
+
+            # Test scal primitive [alpha - F32, F64, x - CF32, CF64] 
+            A = rand(T,m)
+            gpuA = oneArray(A)
+            if T === ComplexF32
+                alphaf32 = rand(Float32, 1)
+                oneMKL.scal!(m, alphaf32[1], gpuA)
+                @test Array(A .* alphaf32[1]) ≈ Array(gpuA)
+            end
+
+            if T === ComplexF64
+                alphaf64 = rand(Float64, 1)
+                oneMKL.scal!(m, alphaf64[1], gpuA)
+                @test Array(A .* alphaf64[1]) ≈ Array(gpuA)
+            end	    
         end
 
         @testset "nrm2" begin
@@ -43,6 +69,10 @@ m = 20
                             oneArray(rand(T,m)),
                             oneArray(rand(T,m)))
             end
+
+        @testset "asum" begin
+            @test testf(BLAS.asum, rand(T,m))
+
         end
     end
 end
