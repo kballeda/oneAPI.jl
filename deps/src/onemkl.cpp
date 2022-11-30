@@ -93,7 +93,7 @@ extern "C" void onemklSdot(syclQueue_t device_queue, int64_t n,
                            int64_t incy, float *result) {
     auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x,
                                                        incx, y, incy, result);
-    status.wait();
+    __FORCE_MKL_FLUSH__(status);
 }
 
 extern "C" void onemklDdot(syclQueue_t device_queue, int64_t n,
@@ -101,7 +101,7 @@ extern "C" void onemklDdot(syclQueue_t device_queue, int64_t n,
                            int64_t incy, double *result) {
     auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n, x,
                                                        incx, y, incy, result);
-    status.wait();
+    __FORCE_MKL_FLUSH__(status);
 }
 
 extern "C" void onemklCdotc(syclQueue_t device_queue, int64_t n,
@@ -111,7 +111,7 @@ extern "C" void onemklCdotc(syclQueue_t device_queue, int64_t n,
                                                 reinterpret_cast<const std::complex<float> *>(x), incx,
                                                 reinterpret_cast<const std::complex<float> *>(y), incy,
                                                 reinterpret_cast<std::complex<float> *>(result));
-    status.wait();
+    __FORCE_MKL_FLUSH__(status);
 }
 
 extern "C" void onemklZdotc(syclQueue_t device_queue, int64_t n,
@@ -121,7 +121,7 @@ extern "C" void onemklZdotc(syclQueue_t device_queue, int64_t n,
                                                 reinterpret_cast<const std::complex<double> *>(x), incx,
                                                 reinterpret_cast<const std::complex<double> *>(y), incy,
                                                 reinterpret_cast<std::complex<double> *>(result));
-    status.wait();
+    __FORCE_MKL_FLUSH__(status);
 }
 
 extern "C" void onemklCdotu(syclQueue_t device_queue, int64_t n,
@@ -131,7 +131,7 @@ extern "C" void onemklCdotu(syclQueue_t device_queue, int64_t n,
                                                 reinterpret_cast<const std::complex<float> *>(x), incx,
                                                 reinterpret_cast<const std::complex<float> *>(y), incy,
                                                 reinterpret_cast<std::complex<float> *>(result));
-    status.wait();
+    __FORCE_MKL_FLUSH__(status);
 }
 
 extern "C" void onemklZdotu(syclQueue_t device_queue, int64_t n,
@@ -141,7 +141,7 @@ extern "C" void onemklZdotu(syclQueue_t device_queue, int64_t n,
                                                 reinterpret_cast<const std::complex<double> *>(x), incx,
                                                 reinterpret_cast<const std::complex<double> *>(y), incy,
                                                 reinterpret_cast<std::complex<double> *>(result));
-    status.wait();
+    __FORCE_MKL_FLUSH__(status);
 }
 
 
