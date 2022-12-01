@@ -144,7 +144,6 @@ extern "C" void onemklZdotu(syclQueue_t device_queue, int64_t n,
     __FORCE_MKL_FLUSH__(status);
 }
 
-
 extern "C" void onemklSasum(syclQueue_t device_queue, int64_t n, 
                             const float *x, int64_t incx,
                             float *result) {

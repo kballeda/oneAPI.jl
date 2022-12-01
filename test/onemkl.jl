@@ -69,6 +69,7 @@ m = 20
                             oneArray(rand(T,m)),
                             oneArray(rand(T,m)))
             end
+        end
 
         @testset "asum" begin
             @test testf(BLAS.asum, rand(T,m))

@@ -42,7 +42,6 @@ function onemklZgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ld
                                     C::ZePtr{ComplexF64}, ldc::Int64)::Cint
 end
 
-
 function onemklSdot(device_queue, n, x, incx, y, incy, result)
     @ccall liboneapi_support.onemklSdot(device_queue::syclQueue_t, n::Int64,
                                         x::ZePtr{Cfloat}, incx::Int64, y::ZePtr{Cfloat},
@@ -78,7 +77,6 @@ function onemklZdotu(device_queue, n, x, incx, y, incy, result)
                                         x::ZePtr{ComplexF64}, incx::Int64, y::ZePtr{ComplexF64},
                                         incy::Int64, result::RefOrZeRef{ComplexF64})::Cvoid
 end
-
 
 function onemklSasum(device_queue, n, x, incx, result)
     @ccall liboneapi_support.onemklSasum(device_queue::syclQueue_t, n::Int64,
