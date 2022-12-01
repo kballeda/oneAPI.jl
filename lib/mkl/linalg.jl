@@ -49,6 +49,19 @@ function gemm_dispatch!(C::oneStridedVecOrMat, A, B, alpha::Number=true, beta::N
     end
 end
 
+LinearAlgebra.BLAS.asum(x::oneStridedVecOrMat{<:onemklFloat}) = oneMKL.asum(length(x), x)
+
+function LinearAlgebra.axpy!(alpha::Number, x::oneStridedVecOrMat{T}, y::oneStridedVecOrMat{T}) where T<:onemklFloat
+    length(x)==length(y) || throw(DimensionMismatch("axpy arguments have lengths $(length(x)) and $(length(y))"))
+    oneMKL.axpy!(length(x), alpha, x, y)
+end
+
+LinearAlgebra.rmul!(x::oneStridedVecOrMat{<:onemklFloat}, k::Number) = 
+	oneMKL.scal!(length(x), convert(eltype(x),k), x)
+
+# Work around ambiguity with GPUArrays wrapper
+LinearAlgebra.rmul!(x::oneStridedVecOrMat{<:onemklFloat}, k::Real) =
+	invoke(rmul!, Tuple{typeof(x), Number}, x, k)
 LinearAlgebra.norm(x::oneStridedVecOrMat{<:onemklFloat}) = oneMKL.nrm2(length(x), x)
 
 for NT in (Number, Real)
