@@ -335,7 +335,7 @@ function onemklSsyr(device_queue, uplo, n, alpha, x, incx, a, lda)
 end
 
 function onemklDsyr(device_queue, uplo, n, alpha, x, incx, a, lda)
-    @ccall liboneapi_support.onemklSsyr(device_queue::syclQueue_t, uplo::onemklUplo,
+    @ccall liboneapi_support.onemklDsyr(device_queue::syclQueue_t, uplo::onemklUplo,
                                         n::Int64, alpha::Cdouble, x::ZePtr{Cdouble}, 
                                         incx::Int64, a::ZePtr{Cdouble}, lda::Int64)::Cvoid
 end
