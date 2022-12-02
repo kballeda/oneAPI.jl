@@ -84,6 +84,34 @@ end
     @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
         alpha = rand(T)
         beta = rand(T)
+
+        @testset "gemv" begin
+            @test testf(*, rand(T, m, n), rand(T, n))
+            @test testf(*, transpose(rand(T, m, n)), rand(T, m))
+            @test testf(*, rand(T, m, n)', rand(T, m))
+            x = rand(T, m)
+            A = rand(T, m, m + 1 )
+            y = rand(T, m)
+            dx = oneArray(x)
+            dA = oneArray(A)
+            dy = oneArray(y)
+            @test_throws DimensionMismatch mul!(dy, dA, dx)
+            A = rand(T, m + 1, m )
+            dA = oneArray(A)
+            @test_throws DimensionMismatch mul!(dy, dA, dx)
+            x = rand(T, m)
+            A = rand(T, n, m)
+            dx = oneArray(x)
+            dA = oneArray(A)
+            alpha = rand(T)
+            dy = oneMKL.gemv('N', alpha, dA, dx)
+            hy = collect(dy)
+            @test hy ≈ alpha * A * x
+            dy = oneMKL.gemv('N', dA, dx)
+            hy = collect(dy)
+            @test hy ≈ A * x
+        end
+
         @testset "banded methods" begin
             # bands
             ku = 2
@@ -133,16 +161,18 @@ end
                 h_y = Array(d_y)
                 @test y ≈ h_y
             end
-            x = rand(T,n)
-            d_x = oneArray(x)
+
             @testset "gbmv" begin
                 # test y = alpha*A*x
+                x = rand(T,n)
+                d_x = oneArray(x)
                 d_y = oneMKL.gbmv('N', m, kl, ku, alpha, d_Ab, d_x)
                 y = zeros(T,m)
                 y = BLAS.gbmv('N',m,kl,ku,alpha,Ab,x)
                 h_y = Array(d_y)
                 @test y ≈ h_y
             end
+
             A = rand(T,m,m)
             A = A + A'
             nbands = 3
@@ -220,7 +250,7 @@ end
                 @test y ≈ h_y
             end
             
-            @testset "tbsv!" begin
+#=            @testset "tbsv!" begin
                 # generate triangular matrix
                 A = rand(T,m,m)
                 # restrict to 3 bands
@@ -259,36 +289,9 @@ end
                 # compare
                 h_y = Array(d_y)
                 @test y ≈ h_y
-            end
+            end =#
         end # banded end
 
-        @testset "gemv" begin
-            @test testf(*, rand(T, m, n), rand(T, n))
-            @test testf(*, transpose(rand(T, m, n)), rand(T, m))
-            @test testf(*, rand(T, m, n)', rand(T, m))
-            x = rand(T, m)
-            A = rand(T, m, m + 1 )
-            y = rand(T, m)
-            dx = oneArray(x)
-            dA = oneArray(A)
-            dy = oneArray(y)
-            @test_throws DimensionMismatch mul!(dy, dA, dx)
-            A = rand(T, m + 1, m )
-            dA = oneArray(A)
-            @test_throws DimensionMismatch mul!(dy, dA, dx)
-            x = rand(T, m)
-            A = rand(T, n, m)
-            dx = oneArray(x)
-            dA = oneArray(A)
-            alpha = rand(T)
-            dy = oneMKL.gemv('N', alpha, dA, dx)
-            hy = collect(dy)
-            @test hy ≈ alpha * A * x
-            dy = oneMKL.gemv('N', dA, dx)
-            hy = collect(dy)
-            @test hy ≈ A * x
-        end
-        
         @testset "ger!" begin
             A = rand(T,m,m)
             x = rand(T,m)
@@ -304,6 +307,7 @@ end
             hB = Array(dB)
             @test B ≈ hB
         end
+
         @testset "Triangular" begin
             @testset "trmv!" begin
                 sA = rand(T,m,m)
@@ -319,7 +323,6 @@ end
                 # compare
                 h_y = Array(d_y)
                 @test y ≈ h_y
-                #@test_throws DimensionMismatch oneMKL.trmv!('U','N','N',dA, rand(T,m+1))
             end
 
             @testset "trmv" begin
