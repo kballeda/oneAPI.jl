@@ -88,7 +88,6 @@ end
             # bands
             ku = 2
             kl = 3
-
             # generate banded matrix
             A = rand(T, m,n)
             A = bandex(A, kl, ku)
