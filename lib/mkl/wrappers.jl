@@ -323,9 +323,9 @@ for (fname, elty) in ((:onemklSger, :Float32),
                       (:onemklZgerc, :ComplexF64))
     @eval begin
         function ger!(alpha::Number,
-                      x::oneStridedArray{$elty},
-                      y::oneStridedArray{$elty},
-                      a::oneStridedArray{$elty})
+                      x::oneStridedVecOrMat{$elty},
+                      y::oneStridedVecOrMat{$elty},
+                      a::oneStridedVecOrMat{$elty})
             m,n = size(a)
             m == length(x) || throw(DimensionMismatch(""))
             n == length(y) || throw(DimensionMismatch(""))

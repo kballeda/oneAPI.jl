@@ -76,6 +76,16 @@ function LinearAlgebra.dot(x::oneStridedArray{T}, y::oneStridedArray{T}) where T
     oneMKL.dotc(n, x, y)
 end
 
+function LinearAlgebra.mul!(y::oneStridedArray{T}, A::Hermitian{T, <:oneStridedArray}, x::oneStridedArray{T},
+                        α::Number, β::Number) where {T<:Union{ComplexF32,ComplexF64}}
+    alpha, beta = promote(α, β, zero(T))
+    if alpha isa Union{Bool,T} && beta isa Union{Bool,T}
+        return oneMKL.hemv!(A.uplo, alpha, A.data, x, beta, y)
+    else
+        error("only supports BLAS type, got $T")
+    end
+end
+
 for NT in (Number, Real)
     # NOTE: alpha/beta also ::Real to avoid ambiguities with certain Base methods
     @eval begin
