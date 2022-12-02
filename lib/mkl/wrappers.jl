@@ -179,6 +179,16 @@ for (fname, elty) in ((:onemklCher2,:ComplexF32),
     end
 end
 
+function Base.convert(::Type{onemklDiag}, diag::Char)
+    if diag == 'N'
+        return ONEMKL_DIAG_NONUNIT
+    elseif diag == 'U'
+        return ONEMKL_DIAG_UNIT
+    else
+        throw(ArgumentError("Unknown transpose $diag"))
+    end
+end
+
 # level 1
 ## axpy primitive
 for (fname, elty) in 
@@ -517,6 +527,141 @@ for (fname, elty) in ((:onemklSgbmv, :Float32),
                       x::oneStridedArray{$elty})
             queue = global_queue(context(x), device(x))
             gbmv(trans, m, kl, ku, one($elty), a, x)
+        end
+    end
+end
+
+# tbmv
+### tbmv, (TB) triangular banded matrix-vector multiplication
+for (fname, elty) in ((:onemklStbmv,:Float32),
+                      (:onemklDtbmv,:Float64),
+                      (:onemklCtbmv,:ComplexF32),
+                      (:onemklZtbmv,:ComplexF64))
+    @eval begin
+        function tbmv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       k::Integer,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
+            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
+            if n != length(x) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, k, A, lda, x, incx)
+            x
+        end
+
+        function tbmv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      k::Integer,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            tbmv!(uplo, trans, diag, k, A, copy(x))
+        end
+    end
+end
+
+### tbsv, (TB) triangular banded matrix solve
+for (fname, elty) in ((:onemklStbsv,:Float32),
+                      (:onemklDtbsv,:Float64),
+                      (:onemklCtbsv,:ComplexF32),
+                      (:onemklZtbsv,:ComplexF64))
+    @eval begin
+        function tbsv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       k::Integer,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
+            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
+            if n != length(x) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, k, A, lda, x, incx)
+            x
+        end
+
+        function tbsv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      k::Integer,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            tbsv!(uplo, trans, diag, k, A, copy(x))
+        end
+
+    end
+end
+
+### trmv, Triangular matrix-vector multiplication
+for (fname, elty) in ((:onemklStrmv, :Float32),
+                      (:onemklDtrmv, :Float64),
+                      (:onemklCtrmv, :ComplexF32),
+                      (:onemklZtrmv, :ComplexF64))
+    @eval begin
+        function trmv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if m != n throw(DimensionMismatch("Matrix A is $m by $n but must be square")) end
+            if n != length(x)
+                throw(DimensionMismatch("length(x)=$(length(x)) does not match size(A)=$(size(A))"))
+            end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, A, lda, x, incx)
+            x
+        end
+
+        function trmv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            trmv!(uplo, trans, diag, A, copy(x))
+        end
+    end
+end
+
+### trsv, Triangular matrix-vector solve
+for (fname, elty) in ((:onemklStrsv, :Float32),
+                      (:onemklDtrsv, :Float64),
+                      (:onemklCtrsv, :ComplexF32),
+                      (:onemklZtrsv, :ComplexF64))
+    @eval begin
+        function trsv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if m != n throw(DimensionMismatch("Matrix A is $m by $n but must be square")) end
+            if n != length(x)
+                throw(DimensionMismatch("length(x)=$(length(x)) does not match size(A)=$(size(A))"))
+            end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, A, lda, x, incx)
+            x
+        end
+        function trsv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            trsv!(uplo, trans, diag, A, copy(x))
         end
     end
 end
