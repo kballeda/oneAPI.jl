@@ -24,6 +24,16 @@ function Base.convert(::Type{onemklUplo}, uplo::Char)
     end
 end
 
+function Base.convert(::Type{onemklDiag}, diag::Char)
+    if diag == 'N'
+        return ONEMKL_DIAG_NONUNIT
+    elseif diag == 'U'
+        return ONEMKL_DIAG_UNIT
+    else
+        throw(ArgumentError("Unknown transpose $diag"))
+    end
+end
+
 # level 2
 ## gemv
 for (fname, elty) in ((:onemklSgemv, :Float32),
@@ -176,16 +186,6 @@ for (fname, elty) in ((:onemklCher2,:ComplexF32),
             $fname(sycl_queue(queue), uplo, n, alpha, x, incx, y, incy, A, lda)
             A
         end
-    end
-end
-
-function Base.convert(::Type{onemklDiag}, diag::Char)
-    if diag == 'N'
-        return ONEMKL_DIAG_NONUNIT
-    elseif diag == 'U'
-        return ONEMKL_DIAG_UNIT
-    else
-        throw(ArgumentError("Unknown transpose $diag"))
     end
 end
 
@@ -563,41 +563,6 @@ for (fname, elty) in ((:onemklStbmv,:Float32),
                       x::oneStridedVecOrMat{$elty})
             tbmv!(uplo, trans, diag, k, A, copy(x))
         end
-    end
-end
-
-### tbsv, (TB) triangular banded matrix solve
-for (fname, elty) in ((:onemklStbsv,:Float32),
-                      (:onemklDtbsv,:Float64),
-                      (:onemklCtbsv,:ComplexF32),
-                      (:onemklZtbsv,:ComplexF64))
-    @eval begin
-        function tbsv!(uplo::Char,
-                       trans::Char,
-                       diag::Char,
-                       k::Integer,
-                       A::oneStridedMatrix{$elty},
-                       x::oneStridedVector{$elty})
-            m, n = size(A)
-            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
-            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
-            if n != length(x) throw(DimensionMismatch("")) end
-            lda = max(1,stride(A,2))
-            incx = stride(x,1)
-            queue = global_queue(context(A), device(A))
-            $fname(sycl_queue(queue), uplo, trans, diag, n, k, A, lda, x, incx)
-            x
-        end
-
-        function tbsv(uplo::Char,
-                      trans::Char,
-                      diag::Char,
-                      k::Integer,
-                      A::oneStridedMatrix{$elty},
-                      x::oneStridedVector{$elty})
-            tbsv!(uplo, trans, diag, k, A, copy(x))
-        end
-
     end
 end
 

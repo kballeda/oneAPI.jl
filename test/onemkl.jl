@@ -250,47 +250,7 @@ end
                 @test y ≈ h_y
             end
             
-#=            @testset "tbsv!" begin
-                # generate triangular matrix
-                A = rand(T,m,m)
-                # restrict to 3 bands
-                nbands = 3
-                @test m >= 1+nbands
-                A = bandex(A,0,nbands)
-                # convert to 'upper' banded storage format
-                AB = band(A,0,nbands)
-                d_AB = oneArray(AB)
-                # construct x
-                x = rand(T,m)
-                d_x = oneArray(x)
-                d_y = copy(d_x)
-                #tbsv!
-                oneMKL.tbsv!('U','N','N',nbands,d_AB,d_y)
-                y = A\x
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end
-            @testset "tbsv" begin
-                # generate triangular matrix
-                A = rand(T,m,m)
-                # restrict to 3 bands
-                nbands = 3
-                @test m >= 1+nbands
-                A = bandex(A,0,nbands)
-                # convert to 'upper' banded storage format
-                AB = band(A,0,nbands)
-                d_AB = oneArray(AB)
-                # construct x
-                x = rand(T,m)
-                d_x = oneArray(x)
-                d_y = oneMKL.tbsv('U','N','N',nbands,d_AB,d_x)
-                y = A\x
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end =#
-        end # banded end
+        end
 
         @testset "ger!" begin
             A = rand(T,m,m)
