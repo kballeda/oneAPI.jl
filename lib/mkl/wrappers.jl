@@ -14,6 +14,16 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+function Base.convert(::Type{onemklSide}, side::Char)
+    if side == 'L'
+        return ONEMKL_SIDE_LEFT
+    elseif side == 'R'
+        return ONEMKL_SIDE_RIGHT
+    else
+        throw(ArgumentError("Unknown transpose $side"))
+    end
+end
+
 function Base.convert(::Type{onemklUplo}, uplo::Char)
     if uplo == 'U'
         return ONEMKL_UPLO_UPPER
@@ -34,15 +44,134 @@ function Base.convert(::Type{onemklDiag}, diag::Char)
     end
 end
 
-function Base.convert(::Type{onemklSide}, side::Char)
-    if side == 'L'
-        return ONEMKL_SIDE_LEFT
-    elseif side == 'R'
-        return ONEMKL_SIDE_RIGHT
-    else
-        throw(ArgumentError("Unknown transpose $side"))
+## (L3: symm) symmetric matrix-matrix and matrix-vector multiplication
+for (fname, elty) in ((:onemklSsymm, :Float32),
+                      (:onemklDsymm, :Float64),
+                      (:onemklCsymm, :ComplexF32),
+                      (:onemklZsymm, :ComplexF64))
+    @eval begin
+        function symm!(side::Char,
+                       uplo::Char,
+                       alpha::Number,
+                       A::oneStridedVecOrMat{$elty},
+                       B::oneStridedVecOrMat{$elty},
+                       beta::Number,
+                       C::oneStridedVecOrMat{$elty})
+            k, nA = size(A)
+            if k != nA throw(DimensionMismatch("Matrix A must be square")) end
+            m = side == 'L' ? k : size(B,1)
+            n = side == 'L' ? size(B,2) : k
+            if m != size(C,1) || n != size(C,2) || k != size(B, side == 'L' ? 1 : 2)
+                throw(DimensionMismatch(""))
+            end
+            lda = max(1,stride(A,2))
+            ldb = max(1,stride(B,2))
+            ldc = max(1,stride(C,2))
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), side, uplo, m, n, alpha, A, lda, B, ldb,
+                   beta, C, ldc)
+            C
+        end
+
+        function symm(side::Char,
+                      uplo::Char,
+                      alpha::Number,
+                      A::oneStridedVecOrMat{$elty},
+                      B::oneStridedVecOrMat{$elty})
+            symm!(side, uplo, alpha, A, B, zero($elty), similar(B))
+        end
+
+        function symm(side::Char,
+                      uplo::Char,
+                      A::oneStridedVecOrMat{$elty},
+                      B::oneStridedVecOrMat{$elty})
+            symm(side, uplo, one($elty), A, B)
+        end
     end
 end
+
+## syrk
+for (fname, elty) in ((:onemklDsyrk,:Float64),
+                      (:onemklSsyrk,:Float32),
+                      (:onemklCsyrk,:ComplexF32),
+                      (:onemklZsyrk,:ComplexF64))
+    @eval begin
+        function syrk!(uplo::Char,
+                       trans::Char,
+                       alpha::Number,
+                       A::oneStridedVecOrMat{$elty},
+                       beta::Number,
+                       C::oneStridedMatrix{$elty})
+            mC, n = size(C)
+            if mC != n throw(DimensionMismatch("C must be square")) end
+            nn = size(A, trans == 'N' ? 1 : 2)
+            if nn != n throw(DimensionMismatch("syrk!")) end
+            k  = size(A, trans == 'N' ? 2 : 1)
+            lda = max(1,stride(A,2))
+            ldc = max(1,stride(C,2))
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), uplo, trans, n, k, alpha, A, lda, beta, C, ldc)
+            C
+        end
+        function syrk(uplo::Char,
+                      trans::Char,
+                      alpha::Number,
+                      A::oneStridedVecOrMat)
+                T = eltype(A)
+                n = size(A, trans == 'N' ? 1 : 2)
+                syrk!(uplo, trans, alpha, A, zero(T), similar(A, T, (n, n)))
+        end
+        syrk(uplo::Char, trans::Char, A::oneStridedVecOrMat) =
+            syrk(uplo, trans, one(eltype(A)), A)
+
+    end
+end
+
+## syr2k
+for (fname, elty) in ((:onemklDsyr2k,:Float64),
+                      (:onemklSsyr2k,:Float32),
+                      (:onemklZsyr2k,:ComplexF64),
+                      (:onemklCsyr2k,:ComplexF32))
+    @eval begin
+        function syr2k!(uplo::Char,
+                        trans::Char,
+                        alpha::Number,
+                        A::oneStridedVecOrMat{$elty},
+                        B::oneStridedVecOrMat{$elty},
+                        beta::Number,
+                        C::oneStridedVecOrMat{$elty})
+            m, n = size(C)
+            if m != n throw(DimensionMismatch("C must be square")) end
+            nA = size(A, trans == 'N' ? 1 : 2)
+            nB = size(B, trans == 'N' ? 1 : 2)
+            if nA != n throw(DimensionMismatch("First dimension of op(A) must match C")) end
+            if nB != n throw(DimensionMismatch("First dimension of op(B.') must match C")) end
+            k  = size(A, trans == 'N' ? 2 : 1)
+            if k != size(B, trans == 'N' ? 2 : 1) throw(DimensionMismatch(
+                "Inner dimensions of op(A) and op(B.') must match")) end
+            lda = max(1,stride(A,2))
+            ldb = max(1,stride(B,2))
+            ldc = max(1,stride(C,2))
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), uplo, trans, n, k, alpha, A, lda, B, ldb, beta, C, ldc)
+            C
+        end
+
+        function syr2k(uplo::Char,
+                       trans::Char,
+                       alpha::Number,
+                       A::oneStridedVecOrMat,
+                       B::oneStridedVecOrMat)
+                T = eltype(A)
+                n = size(A, trans == 'N' ? 1 : 2)
+                syr2k!(uplo, trans, convert(T,alpha), A, B, zero(T), similar(A, T, (n, n)))
+        end
+
+        syr2k(uplo::Char, trans::Char, A::oneStridedVecOrMat, B::oneStridedVecOrMat) =
+                syr2k(uplo, trans, one(eltype(A)), A, B)
+    end
+end
+
 
 # level 1
 ## axpy primitive
