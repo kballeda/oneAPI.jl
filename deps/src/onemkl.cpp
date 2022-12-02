@@ -494,6 +494,52 @@ extern "C" void onemklZher2(syclQueue_t device_queue, onemklUplo uplo, int64_t n
     __FORCE_MKL_FLUSH__(status);
 }
 
+extern "C" void onemklSsbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, int64_t k,
+                            float alpha, const float *a, int64_t lda, const float *x, 
+                            int64_t incx, float beta, float *y, int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::sbmv(device_queue->val, convert(uplo), n, k,
+                                                    alpha, a, lda, x, incx, beta, y, incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklDsbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, int64_t k,
+                            double alpha, const double *a, int64_t lda, const double *x, 
+                            int64_t incx, double beta, double *y, int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::sbmv(device_queue->val, convert(uplo), n, k,
+                                                    alpha, a, lda, x, incx, beta, y, incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklSsymv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                            const float *a, int64_t lda, const float *x, int64_t incx, float beta,
+                            float *y, int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::symv(device_queue->val, convert(uplo), n, alpha,
+                                                    a, lda, x, incx, beta, y, incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklDsymv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double alpha,
+                            const double *a, int64_t lda, const double *x, int64_t incx, double beta,
+                            double *y, int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::symv(device_queue->val, convert(uplo), n, alpha,
+                                                    a, lda, x, incx, beta, y, incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklSsyr(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                           const float *x, int64_t incx, float *a, int64_t lda) {
+    auto status = oneapi::mkl::blas::column_major::syr(device_queue->val, convert(uplo), n, alpha,
+                                                    x, incx, a, lda);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklDsyr(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double alpha,
+                           const double *x, int64_t incx, double *a, int64_t lda) {
+    auto status = oneapi::mkl::blas::column_major::syr(device_queue->val, convert(uplo), n, alpha,
+                                                    x, incx, a, lda);
+    __FORCE_MKL_FLUSH__(status);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

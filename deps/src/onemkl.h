@@ -20,7 +20,6 @@ typedef enum {
     ONEMKL_UPLO_LOWER
 } onemklUplo;
 
-
 // XXX: how to expose half in C?
 // int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
 //                onemklTranspose transB, int64_t m, int64_t n, int64_t k,
@@ -121,41 +120,52 @@ void onemklZscal(syclQueue_t device_queue, int64_t n, double _Complex alpha,
                 double _Complex *x, int64_t incx);
 void onemklZdscal(syclQueue_t device_queue, int64_t n, double alpha, 
                 double _Complex *x, int64_t incx);
+
 void onemklChemv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
                 float _Complex alpha, const float _Complex *a, int64_t lda,
                 const float _Complex *x, int64_t incx, float _Complex beta,
                 float _Complex *y, int64_t incy);
-
 void onemklZhemv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
                 double _Complex alpha, const double _Complex *a, int64_t lda,
                 const double _Complex *x, int64_t incx, double _Complex beta,
                 double _Complex *y, int64_t incy);
-
 void onemklChbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
                 int64_t k, float _Complex alpha, const float _Complex *a,
                 int64_t lda, const float _Complex *x, int64_t incx, float _Complex beta,
                 float _Complex *y, int64_t incy);
-
 void onemklZhbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
                 int64_t k, double _Complex alpha, const double _Complex *a,
                 int64_t lda, const double _Complex *x, int64_t incx, double _Complex beta,
                 double _Complex *y, int64_t incy);
-
 void onemklCher(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
                 const float _Complex *x, int64_t incx, float _Complex *a,
                 int64_t lda);
-
 void onemklZher(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double alpha,
                 const double _Complex *x, int64_t incx, double _Complex *a,
                 int64_t lda);
-
 void onemklCher2(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float _Complex alpha,
                 const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
                 float _Complex *a, int64_t lda);
-
 void onemklZher2(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double _Complex alpha,
                 const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
                 double _Complex *a, int64_t lda);
+
+void onemklSsbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, int64_t k,
+                 float alpha, const float *a, int64_t lda, const float *x, 
+                 int64_t incx, float beta, float *y, int64_t incy);
+void onemklDsbmv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, int64_t k,
+                 double alpha, const double *a, int64_t lda, const double *x, 
+                 int64_t incx, double beta, double *y, int64_t incy);
+void onemklSsymv(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                 const float *a, int64_t lda, const float *x, int64_t incx, float beta,
+                 float *y, int64_t incy);
+void onemklDsymv(syclQueue_t device_queue, onemklUplo uplo, int64_t n,
+                 double alpha, const double *a, int64_t lda, const double *x, 
+                 int64_t incx, double beta, double *y, int64_t incy);
+void onemklSsyr(syclQueue_t device_queue, onemklUplo uplo, int64_t n, float alpha,
+                           const float *x, int64_t incx, float *a, int64_t lda);
+void onemklDsyr(syclQueue_t device_queue, onemklUplo uplo, int64_t n, double alpha,
+                           const double *x, int64_t incx, double *a, int64_t lda);
 
 // Supported Level-1: Nrm2
 void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
