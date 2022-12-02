@@ -14,6 +14,16 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+function Base.convert(::Type{onemklUplo}, uplo::Char)
+    if uplo == 'U'
+        return ONEMKL_UPLO_UPPER
+    elseif uplo == 'L'
+        return ONEMKL_UPLO_LOWER
+    else
+        throw(ArgumentError("Unknown transpose $uplo"))
+    end
+end
+
 # level 2
 ## gemv
 for (fname, elty) in ((:onemklSgemv, :Float32),
@@ -52,6 +62,119 @@ for (fname, elty) in ((:onemklSgemv, :Float32),
                       a::oneStridedArray{$elty},
                       x::oneStridedArray{$elty})
             gemv!(trans, one($elty), a, x, zero($elty), similar(x, $elty, size(a, (trans == 'N' ? 1 : 2))))
+        end
+    end
+end
+
+### hemv
+for (fname, elty) in ((:onemklChemv,:ComplexF32),
+                      (:onemklZhemv,:ComplexF64))
+    @eval begin
+        function hemv!(uplo::Char,
+                       alpha::Number,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty},
+                       beta::Number,
+                       y::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if m != n throw(DimensionMismatch("Matrix A is $m by $n but must be square")) end
+            if m != length(x) || m != length(y) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            incy = stride(y,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, alpha, A, lda, x, incx, beta, y, incy)
+            y
+        end
+
+        function hemv(uplo::Char, alpha::Number, A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            hemv!(uplo, alpha, A, x, zero($elty), similar(x))
+        end
+        function hemv(uplo::Char, A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            hemv(uplo, one($elty), A, x)
+        end
+    end
+end
+
+### hbmv, (HB) Hermitian banded matrix-vector multiplication
+for (fname, elty) in ((:onemklChbmv,:ComplexF32),
+                      (:onemklZhbmv,:ComplexF64))
+    @eval begin
+
+        function hbmv!(uplo::Char,
+                       k::Integer,
+                       alpha::Number,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty},
+                       beta::Number,
+                       y::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
+            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
+            if n != length(x) || n != length(y) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            incy = stride(y,1)
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, k, alpha, A, lda, x, incx, beta, y, incy)
+            y
+        end
+
+        function hbmv(uplo::Char, k::Integer, alpha::Number,
+                      A::oneStridedVecOrMat{$elty}, x::oneStridedVecOrMat{$elty})
+            n = size(A,2)
+            hbmv!(uplo, k, alpha, A, x, zero($elty), similar(x, $elty, n))
+        end
+
+        function hbmv(uplo::Char, k::Integer, A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            hbmv(uplo, k, one($elty), A, x)
+        end
+
+    end
+end
+
+### her
+for (fname, elty) in ((:onemklCher,:ComplexF32),
+                      (:onemklZher,:ComplexF64))
+    @eval begin
+        function her!(uplo::Char,
+                      alpha::Number,
+                      x::oneStridedVecOrMat{$elty},
+                      A::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            m == n || throw(DimensionMismatch("Matrix A is $m by $n but must be square"))
+            length(x) == n || throw(DimensionMismatch("Length of vector must be the same as the matrix dimensions"))
+            incx = stride(x,1)
+            lda = max(1,stride(A,2))
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, alpha, x, incx, A, lda)
+            A
+        end
+    end
+end
+
+### her2
+for (fname, elty) in ((:onemklCher2,:ComplexF32),
+                      (:onemklZher2,:ComplexF64))
+    @eval begin
+        function her2!(uplo::Char,
+                      alpha::Number,
+                      x::oneStridedVecOrMat{$elty},
+                      y::oneStridedVecOrMat{$elty},
+                      A::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            m == n || throw(DimensionMismatch("Matrix A is $m by $n but must be square"))
+            length(x) == n || throw(DimensionMismatch("Length of vector must be the same as the matrix dimensions"))
+            length(y) == n || throw(DimensionMismatch("Length of vector must be the same as the matrix dimensions"))
+            incx = stride(x,1)
+            incy = stride(y,1)
+            lda = max(1,stride(A,2))
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue), uplo, n, alpha, x, incx, y, incy, A, lda)
+            A
         end
     end
 end

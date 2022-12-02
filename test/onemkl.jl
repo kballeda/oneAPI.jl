@@ -179,4 +179,143 @@ end
             @test B ≈ hB
         end
     end
+
+    @testset for T in intersect(eltypes, [ComplexF32, ComplexF64])
+        alpha = rand(T)
+        beta = rand(T)
+        @testset "hemv!" begin
+            A = rand(T,m,n)
+            dA = oneArray(A)
+            sA = rand(T,m,m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            hA = rand(T,m,m)
+            hA = hA + hA'
+            dhA = oneArray(hA)
+            x = rand(T,m)
+            dx = oneArray(x)
+            y = rand(T,m)
+            dy = oneArray(y)
+
+            # execute on host
+            BLAS.hemv!('U',alpha,hA,x,beta,y)
+            # execute on device
+            oneMKL.hemv!('U',alpha,dhA,dx,beta,dy)
+
+            # compare results
+            hy = Array(dy)
+            @test y ≈ hy
+        end
+
+        @testset "hemv" begin
+            A = rand(T,m,n)
+            dA = oneArray(A)
+            sA = rand(T,m,m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            hA = rand(T,m,m)
+            hA = hA + hA'
+            dhA = oneArray(hA)
+            x = rand(T,m)
+            dx = oneArray(x)
+            y = rand(T,m)
+            dy = oneArray(y)
+
+            y = BLAS.hemv('U',hA,x)
+            # execute on device
+            dy = oneMKL.hemv('U',dhA,dx)
+            # compare results
+            hy = Array(dy)
+            @test y ≈ hy
+        end
+
+        @testset "hbmv!" begin
+            A = rand(T,m,m)
+            A = A + A'
+            nbands = 3
+            @test m >= 1+nbands
+            A = bandex(A,nbands,nbands)
+            # convert to 'upper' banded storage format
+            AB = band(A,0,nbands)
+            # construct x
+            x = rand(T,m)
+            d_AB = oneArray(AB)
+            d_x = oneArray(x)
+
+            y = rand(T,m)
+            d_y = oneArray(y)
+            # hbmv!
+            oneMKL.hbmv!('U',nbands,alpha,d_AB,d_x,beta,d_y)
+            y = alpha*(A*x) + beta*y
+            # compare
+            h_y = Array(d_y)
+            @test y ≈ h_y
+        end
+
+        @testset "hbmv" begin
+            A = rand(T,m,m)
+            A = A + A'
+            nbands = 3
+            @test m >= 1+nbands
+            A = bandex(A,nbands,nbands)
+            # convert to 'upper' banded storage format
+            AB = band(A,0,nbands)
+            # construct x
+            x = rand(T,m)
+            d_AB = oneArray(AB)
+            d_x = oneArray(x)
+
+            d_y = oneMKL.hbmv('U',nbands,d_AB,d_x)
+            y = A*x
+            # compare
+            h_y = Array(d_y)
+            @test y ≈ h_y
+        end
+
+        @testset "her!" begin
+            A = rand(T,m,n)
+            dA = oneArray(A)
+            sA = rand(T,m,m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            hA = rand(T,m,m)
+            hA = hA + hA'
+            dhA = oneArray(hA)
+            x = rand(T,m)
+            dx = oneArray(x)
+            dB = copy(dhA)
+            # perform rank one update
+            oneMKL.her!('U',real(alpha),dx,dB)
+            B = (real(alpha)*x)*x' + hA
+            # move to host and compare upper triangles
+            hB = Array(dB)
+            B = triu(B)
+            hB = triu(hB)
+            @test B ≈ hB
+        end
+
+        @testset "her2!" begin
+            A = rand(T,m,n)
+            dA = oneArray(A)
+            sA = rand(T,m,m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            hA = rand(T,m,m)
+            hA = hA + hA'
+            dhA = oneArray(hA)
+            x = rand(T,m)
+            dx = oneArray(x)
+            y = rand(T,m)
+            dy = oneArray(y)
+            dB = copy(dhA)
+            oneMKL.her2!('U',real(alpha),dx,dy,dB)
+            B = (real(alpha)*x)*y' + y*(real(alpha)*x)' + hA
+            # move to host and compare upper triangles
+            hB = Array(dB)
+            B = triu(B)
+            hB = triu(hB)
+            @test B ≈ hB
+        end
+    end
 end
+

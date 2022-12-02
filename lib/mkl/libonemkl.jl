@@ -6,6 +6,11 @@ using CEnum
     ONEMLK_TRANSPOSE_CONJTRANS = 2
 end
 
+@cenum onemklUplo::UInt32 begin
+    ONEMKL_UPLO_UPPER = 0
+    ONEMKL_UPLO_LOWER = 1
+end
+
 function onemklSgbmv(device_queue, trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy)
     @ccall liboneapi_support.onemklSgbmv(device_queue::syclQueue_t, trans::onemklTranspose, 
                                         m::Int64, n::Int64, kl::Int64, ku::Int64, alpha::Cfloat,
@@ -234,6 +239,60 @@ function onemklZgerc(device_queue, m, n, alpha, x, incx, y, incy, a, lda)
                                         alpha::ComplexF64, x::ZePtr{ComplexF64}, incx::Int64,
                                         y::ZePtr{ComplexF64}, incy::Int64, a::ZePtr{ComplexF64},
                                         lda::Int64)::Cvoid
+end
+
+function onemklChemv(device_queue, uplo, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklChemv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::ComplexF32, a::ZePtr{ComplexF32},
+                                         lda::Int64, x::ZePtr{ComplexF32}, incx::Int64,
+                                         beta::ComplexF32, y::ZePtr{ComplexF32}, incy::Int64)::Cvoid
+end
+
+function onemklZhemv(device_queue, uplo, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklZhemv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::ComplexF64, a::ZePtr{ComplexF64},
+                                         lda::Int64, x::ZePtr{ComplexF64}, incx::Int64,
+                                         beta::ComplexF64, y::ZePtr{ComplexF64}, incy::Int64)::Cvoid
+end
+
+function onemklChbmv(device_queue, uplo, n, k, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklChbmv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, k::Int64, alpha::ComplexF32, a::ZePtr{ComplexF32},
+                                         lda::Int64, x::ZePtr{ComplexF32}, incx::Int64, beta::ComplexF32,
+                                         y::ZePtr{ComplexF32}, incy::Int64)::Cvoid
+end
+
+function onemklZhbmv(device_queue, uplo, n, k, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklZhbmv(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, k::Int64, alpha::ComplexF32, a::ZePtr{ComplexF64},
+                                         lda::Int64, x::ZePtr{ComplexF64}, incx::Int64, beta::ComplexF64,
+                                         y::ZePtr{ComplexF64}, incy::Int64)::Cvoid
+end
+
+function onemklCher(device_queue, uplo, n, alpha, x, incx, a, lda)
+    @ccall liboneapi_support.onemklCher(device_queue::syclQueue_t, uplo::onemklUplo,
+                                        n::Int64, alpha::ComplexF32, x::ZePtr{ComplexF32},
+                                        incx::Int64, a::ZePtr{ComplexF32}, lda::Int64)::Cvoid
+end
+
+function onemklZher(device_queue, uplo, n, alpha, x, incx, a, lda)
+    @ccall liboneapi_support.onemklZher(device_queue::syclQueue_t, uplo::onemklUplo,
+                                        n::Int64, alpha::ComplexF64, x::ZePtr{ComplexF64},
+                                        incx::Int64, a::ZePtr{ComplexF64}, lda::Int64)::Cvoid
+end
+
+function onemklCher2(device_queue, uplo, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklCher2(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::ComplexF32, x::ZePtr{ComplexF32},
+                                         incx::Int64, y::ZePtr{ComplexF32}, incy::Int64,
+                                         a::ZePtr{ComplexF32}, lda::Int64)::Cvoid
+end
+
+function onemklZher2(device_queue, uplo, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklZher2(device_queue::syclQueue_t, uplo::onemklUplo,
+                                         n::Int64, alpha::ComplexF64, x::ZePtr{ComplexF64},
+                                         incx::Int64, y::ZePtr{ComplexF64}, incy::Int64,
+                                         a::ZePtr{ComplexF64}, lda::Int64)::Cvoid
 end
 
 function onemklDnrm2(device_queue, n, x, incx, result)
