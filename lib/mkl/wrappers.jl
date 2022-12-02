@@ -576,15 +576,15 @@ for (fname, elty) in ((:onemklStbsv,:Float32),
                        trans::Char,
                        diag::Char,
                        k::Integer,
-                       A::oneStridedVecOrMat{$elty},
-                       x::oneStridedVecOrMat{$elty})
+                       A::oneStridedMatrix{$elty},
+                       x::oneStridedVector{$elty})
             m, n = size(A)
             if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
             if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
             if n != length(x) throw(DimensionMismatch("")) end
             lda = max(1,stride(A,2))
             incx = stride(x,1)
-            queue = global_queue(context(x), device(x))
+            queue = global_queue(context(A), device(A))
             $fname(sycl_queue(queue), uplo, trans, diag, n, k, A, lda, x, incx)
             x
         end
@@ -593,8 +593,8 @@ for (fname, elty) in ((:onemklStbsv,:Float32),
                       trans::Char,
                       diag::Char,
                       k::Integer,
-                      A::oneStridedVecOrMat{$elty},
-                      x::oneStridedVecOrMat{$elty})
+                      A::oneStridedMatrix{$elty},
+                      x::oneStridedVector{$elty})
             tbsv!(uplo, trans, diag, k, A, copy(x))
         end
 

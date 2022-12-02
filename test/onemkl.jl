@@ -134,6 +134,8 @@ end
                 h_y = Array(d_y)
                 @test y ≈ h_y
             end
+            x = rand(T,n)
+            d_x = oneArray(x)
             @testset "gbmv" begin
                 # test y = alpha*A*x
                 d_y = oneMKL.gbmv('N', m, kl, ku, alpha, d_Ab, d_x)
@@ -190,7 +192,76 @@ end
                     @test y ≈ h_y
                 end
             end
-        end
+            # generate triangular matrix
+            A = rand(T,m,m)
+            # restrict to 3 bands
+            nbands = 3
+            @test m >= 1+nbands
+            A = bandex(A,0,nbands)
+            # convert to 'upper' banded storage format
+            AB = band(A,0,nbands)
+            d_AB = oneArray(AB)
+            @testset "tbmv!" begin
+                y = rand(T, m)
+                # move to host
+                d_y = oneArray(y)
+                # tbmv!
+                oneMKL.tbmv!('U','N','N',nbands,d_AB,d_y)
+                y = A*y
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+            @testset "tbmv" begin
+                # tbmv
+                d_y = oneMKL.tbmv('U','N','N',nbands,d_AB,d_x)
+                y = A*x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+            
+            @testset "tbsv!" begin
+                # generate triangular matrix
+                A = rand(T,m,m)
+                # restrict to 3 bands
+                nbands = 3
+                @test m >= 1+nbands
+                A = bandex(A,0,nbands)
+                # convert to 'upper' banded storage format
+                AB = band(A,0,nbands)
+                d_AB = oneArray(AB)
+                # construct x
+                x = rand(T,m)
+                d_x = oneArray(x)
+                d_y = copy(d_x)
+                #tbsv!
+                oneMKL.tbsv!('U','N','N',nbands,d_AB,d_y)
+                y = A\x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+            @testset "tbsv" begin
+                # generate triangular matrix
+                A = rand(T,m,m)
+                # restrict to 3 bands
+                nbands = 3
+                @test m >= 1+nbands
+                A = bandex(A,0,nbands)
+                # convert to 'upper' banded storage format
+                AB = band(A,0,nbands)
+                d_AB = oneArray(AB)
+                # construct x
+                x = rand(T,m)
+                d_x = oneArray(x)
+                d_y = oneMKL.tbsv('U','N','N',nbands,d_AB,d_x)
+                y = A\x
+                # compare
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+        end # banded end
 
         @testset "gemv" begin
             @test testf(*, rand(T, m, n), rand(T, n))
@@ -331,7 +402,7 @@ end
         end
     end
 
-#=    @testset "symmetric" begin
+    @testset "symmetric" begin
         @testset for T in intersect(eltypes, [Float32, Float64])
             alpha = rand(T)
             beta = rand(T)
@@ -346,24 +417,6 @@ end
             x = rand(T,m)
             d_AB = oneArray(AB)
             d_x = oneArray(x)
-            @testset "sbmv!" begin
-                y = rand(T,m)
-                d_y = oneArray(y)
-                # sbmv!
-                oneMKL.sbmv!('U',nbands,alpha,d_AB,d_x,beta,d_y)
-                y = alpha*(A*x) + beta*y
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end
-            @testset "sbmv" begin
-                d_y = oneMKL.sbmv('U',nbands,d_AB,d_x)
-                y = A*x
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end
-    
             @testset "symv tests" begin
                 x = rand(T,m)
                 sA = rand(T, m, m)
@@ -407,97 +460,13 @@ end
                 hB = Array(dB)
                 B = triu(B)
                 hB = triu(hB)
-                #@test B ≈ hB
+                @test B ≈ hB
             end
         end
     end
-
+#=
     @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
         @testset "triangular" begin
-                @testset "tbmv!" begin
-                # generate triangular matrix
-                A = rand(T,m,m)
-                # restrict to 3 bands
-                nbands = 3
-                @test m >= 1+nbands
-                A = bandex(A,0,nbands)
-                # convert to 'upper' banded storage format
-                AB = band(A,0,nbands)
-                d_AB = oneArray(AB)
-                x = rand(T,m)
-                d_x = oneArray(x)
-                y = rand(T, m)
-                # move to host
-                d_y = oneArray(y)
-                # tbmv!
-                oneMKL.tbmv!('U','N','N',nbands,d_AB,d_y)
-                y = A*y
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end
-
-            @testset "tbmv" begin
-                # generate triangular matrix
-                A = rand(T,m,m)
-                # restrict to 3 bands
-                nbands = 3
-                @test m >= 1+nbands
-                A = bandex(A,0,nbands)
-                # convert to 'upper' banded storage format
-                AB = band(A,0,nbands)
-                d_AB = oneArray(AB)
-                x = rand(T,m)
-                d_x = oneArray(x)
-                # tbmv
-                d_y = oneMKL.tbmv('U','N','N',nbands,d_AB,d_x)
-                y = A*x
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end
-
-            @testset "tbsv!" begin
-                # generate triangular matrix
-                A = rand(T,m,m)
-                # restrict to 3 bands
-                nbands = 3
-                #@test m >= 1+nbands
-                A = bandex(A,0,nbands)
-                # convert to 'upper' banded storage format
-                AB = band(A,0,nbands)
-                d_AB = oneArray(AB)
-                x = rand(T,m)
-                d_x = oneArray(x)
-                d_y = copy(d_x)
-                #tbsv!
-                oneMKL.tbsv!('U','N','N',nbands,d_AB,d_y)
-                y = A\x
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end
-
-            @testset "tbsv" begin
-                # generate triangular matrix
-                A = rand(T,m,m)
-                # restrict to 3 bands
-                nbands = 3
-                #@test m >= 1+nbands
-                A = bandex(A,0,nbands)
-                # convert to 'upper' banded storage format
-                AB = band(A,0,nbands)
-                d_AB = oneArray(AB)
-                x = rand(T,m)
-                d_x = oneArray(x)
-                d_y = oneMKL.tbsv('U','N','N',nbands,d_AB,d_x)
-                y = A\x
-                # compare
-                h_y = Array(d_y)
-                @test y ≈ h_y
-            end
-
-
             @testset "trmv!" begin
                 sA = rand(T,m,m)
                 sA = sA + transpose(sA)
@@ -590,5 +559,6 @@ end
             end
 
         end
-    end=#
+    end
+=#
 end
