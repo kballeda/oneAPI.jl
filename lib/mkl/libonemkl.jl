@@ -208,6 +208,34 @@ function onemklZgemv(device_queue, trans, m, n, alpha, a, lda, x, incx, beta, y,
                                         y::ZePtr{ComplexF64}, incy::Int64)::Cvoid
 end
 
+function onemklSger(device_queue, m, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklSger(device_queue::syclQueue_t, m::Int64, n::Int64,
+                                        alpha::Cfloat, x::ZePtr{Cfloat}, incx::Int64,
+                                        y::ZePtr{Cfloat}, incy::Int64, a::ZePtr{Cfloat},
+                                        lda::Int64)::Cvoid
+end
+
+function onemklDger(device_queue, m, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklDger(device_queue::syclQueue_t, m::Int64, n::Int64,
+                                        alpha::Cdouble, x::ZePtr{Cdouble}, incx::Int64,
+                                        y::ZePtr{Cdouble}, incy::Int64, a::ZePtr{Cdouble},
+                                        lda::Int64)::Cvoid
+end
+
+function onemklCgerc(device_queue, m, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklCgerc(device_queue::syclQueue_t, m::Int64, n::Int64,
+                                        alpha::ComplexF32, x::ZePtr{ComplexF32}, incx::Int64,
+                                        y::ZePtr{ComplexF32}, incy::Int64, a::ZePtr{ComplexF32},
+                                        lda::Int64)::Cvoid
+end
+
+function onemklZgerc(device_queue, m, n, alpha, x, incx, y, incy, a, lda)
+    @ccall liboneapi_support.onemklZgerc(device_queue::syclQueue_t, m::Int64, n::Int64,
+                                        alpha::ComplexF64, x::ZePtr{ComplexF64}, incx::Int64,
+                                        y::ZePtr{ComplexF64}, incy::Int64, a::ZePtr{ComplexF64},
+                                        lda::Int64)::Cvoid
+end
+
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 
                                 n::Int64, x::ZePtr{Cdouble}, incx::Int64, 

@@ -71,6 +71,18 @@ void onemklZgemv(syclQueue_t device_queue, onemklTranspose trans, int64_t m,
                  const double _Complex *x, int64_t incx, double _Complex beta,
                  double _Complex *y, int64_t incy);
 
+void onemklSger(syclQueue_t device_queue, int64_t m, int64_t n, float alpha,
+                const float *x, int64_t incx, const float *y, int64_t incy, 
+                float *a, int64_t lda);
+void onemklDger(syclQueue_t device_queue, int64_t m, int64_t n, double alpha,
+                const double *x, int64_t incx, const double *y, int64_t incy, 
+                double *a, int64_t lda);
+void onemklCgerc(syclQueue_t device_queue, int64_t m, int64_t n, float _Complex alpha,
+                const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy, 
+                float _Complex *a, int64_t lda);
+void onemklZgerc(syclQueue_t device_queue, int64_t m, int64_t n, double _Complex alpha,
+                const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy, 
+                double _Complex *a, int64_t lda);
 
 void onemklSasum(syclQueue_t device_queue, int64_t n,
                 const float *x, int64_t incx, float *result);
@@ -116,22 +128,17 @@ void onemklZnrm2(syclQueue_t device_queue, int64_t n, const double _Complex *x,
 
 void onemklSdot(syclQueue_t device_queue, int64_t n, const float *x,
                 int64_t incx, const float *y, int64_t incy, float *result);
-
 void onemklDdot(syclQueue_t device_queue, int64_t n, const double *x,
                 int64_t incx, const double *y, int64_t incy, double *result);
-
 void onemklCdotc(syclQueue_t device_queue, int64_t n, const float _Complex *x,
                 int64_t incx, const float _Complex *y, int64_t incy,
                 float _Complex *result);
-
 void onemklZdotc(syclQueue_t device_queue, int64_t n, const double _Complex *x,
                 int64_t incx, const double _Complex *y, int64_t incy,
                 double _Complex *result);
-
 void onemklCdotu(syclQueue_t device_queue, int64_t n, const float _Complex *x,
                 int64_t incx, const float _Complex *y, int64_t incy,
                 float _Complex *result);
-
 void onemklZdotu(syclQueue_t device_queue, int64_t n, const double _Complex *x,
                 int64_t incx, const double _Complex *y, int64_t incy,
                 double _Complex *result);
