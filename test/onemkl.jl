@@ -70,7 +70,7 @@ k = 13
     end
 end
 
-@testset "level 3" begin
+@testset "level3: hermitian" begin
     @testset for T in intersect(eltypes, [ComplexF32, ComplexF64])
         alpha = rand(T)
         beta = rand(T)
@@ -196,3 +196,101 @@ end
     end
 end
 
+@testset "level-3: traiangular" begin
+    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+        alpha = rand(T)
+        beta = rand(T)
+        
+        @testset "trmm!" begin
+            A = triu(rand(T, m, m))
+            B = rand(T,m,n)
+            dA = oneArray(A)
+            dB = oneArray(B)
+            C = alpha*A*B
+            oneMKL.trmm!('L','U','N','N',alpha,dA,dB)
+            # move to host and compare
+            h_C = Array(dB)
+            @test C ≈ h_C
+        end
+        @testset "trmm" begin
+            A = triu(rand(T, m, m))
+            B = rand(T,m,n)
+            dA = oneArray(A)
+            dB = oneArray(B)
+            C = alpha*A*B
+            oneMKL.trmm('L','U','N','N',alpha,dA,dB)
+            # move to host and compare
+            h_C = Array(dB)
+            @test C ≈ h_C
+        end
+
+        @testset "left trsm!" begin
+            A = triu(rand(T, m, m))
+            B = rand(T,m,n)
+            dA = oneArray(A)
+            dB = oneArray(B)
+            C = alpha*(A\B)
+            dC = copy(dB)
+            oneMKL.trsm!('L','U','N','N',alpha,dA,dC)
+            @test C ≈ Array(dC)
+        end
+
+        @testset "left trsm" begin
+            A = triu(rand(T, m, m))
+            B = rand(T,m,n)
+            dA = oneArray(A)
+            dB = oneArray(B)
+            C = alpha*(A\B)
+            dC = oneMKL.trsm('L','U','N','N',alpha,dA,dB)
+            @test C ≈ Array(dC)
+        end
+
+        @testset "left trsm (adjoint)" begin
+            A = triu(rand(T, m, m))
+            B = rand(T,m,n)
+            dA = oneArray(A)
+            dB = oneArray(B)
+            C = alpha*(adjoint(A)\B)
+            dC = oneMKL.trsm('L','U','C','N',alpha,dA,dB)
+            @test C ≈ Array(dC)
+        end
+
+        @testset "left trsm (transpose)" begin
+            A = triu(rand(T, m, m))
+            B = rand(T,m,n)
+            dA = oneArray(A)
+            dB = oneArray(B)
+            C = alpha*(transpose(A)\B)
+            dC = oneMKL.trsm('L','U','T','N',alpha,dA,dB)
+            @test C ≈ Array(dC)
+        end
+
+        let A = rand(T, m,m), B = triu(rand(T, m, m)), alpha = rand(T)
+            dA = oneArray(A)
+            dB = oneArray(B)
+
+            @testset "right trsm!" begin
+                C = alpha*(A/B)
+                dC = copy(dA)
+                oneMKL.trsm!('R','U','N','N',alpha,dB,dC)
+                @test C ≈ Array(dC)
+            end
+
+            @testset "right trsm" begin
+                C = alpha*(A/B)
+                dC = oneMKL.trsm('R','U','N','N',alpha,dB,dA)
+                @test C ≈ Array(dC)
+            end
+            @testset "right trsm (adjoint)" begin
+                C = alpha*(A/adjoint(B))
+                dC = oneMKL.trsm('R','U','C','N',alpha,dB,dA)
+                @test C ≈ Array(dC)
+            end
+            @testset "right trsm (transpose)" begin
+                C = alpha*(A/transpose(B))
+                dC = oneMKL.trsm('R','U','T','N',alpha,dB,dA)
+                @test C ≈ Array(dC)
+            end
+        end
+    end
+end
