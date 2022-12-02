@@ -306,6 +306,54 @@ extern "C" void onemklZdscal(syclQueue_t device_queue, int64_t n,
 }
 
 
+extern "C" void onemklSgemv(syclQueue_t device_queue, onemklTranspose trans,
+                            int64_t m, int64_t n, float alpha, const float *a,
+                            int64_t lda, const float *x, int64_t incx, float beta,
+                            float *y, int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::gemv(device_queue->val, convert(trans),
+                                            m, n, alpha, a, lda, x, incx, beta, y, incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklDgemv(syclQueue_t device_queue, onemklTranspose trans,
+                            int64_t m, int64_t n, double alpha, const double *a,
+                            int64_t lda, const double *x, int64_t incx, double beta,
+                            double *y, int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::gemv(device_queue->val, convert(trans),
+                                            m, n, alpha, a, lda, x, incx, beta, y, incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklCgemv(syclQueue_t device_queue, onemklTranspose trans,
+                            int64_t m, int64_t n, float _Complex alpha,
+                            const float _Complex *a, int64_t lda,
+                            const float _Complex *x, int64_t incx,
+                            float _Complex beta, float _Complex *y,
+                            int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::gemv(device_queue->val, convert(trans), m, n,
+                                            static_cast<std::complex<float> >(alpha),
+                                            reinterpret_cast<const std::complex<float> *>(a), lda,
+                                            reinterpret_cast<const std::complex<float> *>(x), incx,
+                                            static_cast<std::complex<float> >(beta),
+                                            reinterpret_cast<std::complex<float> *>(y), incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklZgemv(syclQueue_t device_queue, onemklTranspose trans,
+                            int64_t m, int64_t n, double _Complex alpha,
+                            const double _Complex *a, int64_t lda,
+                            const double _Complex *x, int64_t incx,
+                            double _Complex beta, double _Complex *y,
+                            int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::gemv(device_queue->val, convert(trans), m, n,
+                                            static_cast<std::complex<double> >(alpha),
+                                            reinterpret_cast<const std::complex<double> *>(a), lda,
+                                            reinterpret_cast<const std::complex<double> *>(x), incx,
+                                            static_cast<std::complex<double> >(beta),
+                                            reinterpret_cast<std::complex<double> *>(y), incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
 extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x, 
                             int64_t incx, double *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);

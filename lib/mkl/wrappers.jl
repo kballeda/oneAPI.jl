@@ -14,6 +14,48 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+# level 2
+## gemv
+for (fname, elty) in ((:onemklSgemv, :Float32),
+                      (:onemklDgemv, :Float64),
+                      (:onemklCgemv, :ComplexF32),
+                      (:onemklZgemv, :ComplexF64))
+    @eval begin
+        function gemv!(trans::Char,
+                       alpha::Number,
+                       a::oneStridedArray{$elty},
+                       x::oneStridedArray{$elty},
+                       beta::Number, 
+                       y::oneStridedArray{$elty})
+            queue = global_queue(context(x), device(x))
+             # handle trans
+             m,n = size(a)
+             # check dimensions
+             length(x) == (trans == 'N' ? n : m) && length(y) == 
+                          (trans == 'N' ? m : n) || throw(DimensionMismatch(""))
+             # compute increments
+             lda = max(1,stride(a,2))
+             incx = stride(x,1)
+             incy = stride(y,1)
+             $fname(sycl_queue(queue), trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
+             y
+        end
+
+        function gemv(trans::Char,
+                      alpha::Number,
+                      a::oneStridedArray{$elty},
+                      x::oneStridedArray{$elty})
+            gemv!(trans, alpha, a, x, zero($elty), similar(x, $elty, size(a, (trans == 'N' ? 1 : 2))))
+        end
+
+        function gemv(trans::Char,
+                      a::oneStridedArray{$elty},
+                      x::oneStridedArray{$elty})
+            gemv!(trans, one($elty), a, x, zero($elty), similar(x, $elty, size(a, (trans == 'N' ? 1 : 2))))
+        end
+    end
+end
+
 # level 1
 ## axpy primitive
 for (fname, elty) in 
@@ -61,7 +103,7 @@ for (fname, elty, ret_type) in
         function nrm2(n::Integer, x::oneStridedArray{$elty})
             queue = global_queue(context(x), device(x))
             result = oneArray{$ret_type}([0]);
-            $fname(sycl_queue(queue), n, x, stride(x,1), result)            
+            $fname(sycl_queue(queue), n, x, stride(x,1), result)
             res = Array(result)
             return res[1]
         end
@@ -209,7 +251,8 @@ for (fname, elty) in ((:onemklSgbmv, :Float32),
                        beta::Number,
                        y::oneStridedArray{$elty})
             n = size(a,2)
-            length(x) == (trans == 'N' ? n : m) && length(y) == (trans == 'N' ? m : n) || throw(DimensionMismatch(""))
+            length(x) == (trans == 'N' ? n : m) && length(y) == 
+                         (trans == 'N' ? m : n) || throw(DimensionMismatch(""))
             queue = global_queue(context(x), device(x))
             lda = max(1, stride(a,2))
             incx = stride(x,1)

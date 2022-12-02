@@ -133,9 +133,34 @@ end
                 y = BLAS.gbmv('N', m, kl, ku, Ab, x)
                 h_y = Array(d_y)
                 @test y ≈ h_y
+            end
 
+            @testset "gemv" begin
+                @test testf(*, rand(T, m, n), rand(T, n))
+                @test testf(*, transpose(rand(T, m, n)), rand(T, m))
+                @test testf(*, rand(T, m, n)', rand(T, m))
+                x = rand(T, m)
+                A = rand(T, m, m + 1 )
+                y = rand(T, m)
+                dx = oneArray(x)
+                dA = oneArray(A)
+                dy = oneArray(y)
+                @test_throws DimensionMismatch mul!(dy, dA, dx)
+                A = rand(T, m + 1, m )
+                dA = oneArray(A)
+                @test_throws DimensionMismatch mul!(dy, dA, dx)
+                x = rand(T, m)
+                A = rand(T, n, m)
+                dx = oneArray(x)
+                dA = oneArray(A)
+                alpha = rand(T)
+                dy = oneMKL.gemv('N', alpha, dA, dx)
+                hy = collect(dy)
+                @test hy ≈ alpha * A * x
+                dy = oneMKL.gemv('N', dA, dx)
+                hy = collect(dy)
+                @test hy ≈ A * x
             end
         end
     end
 end
-

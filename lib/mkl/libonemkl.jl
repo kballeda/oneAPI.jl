@@ -180,6 +180,34 @@ function onemklCsscal(device_queue, n, alpha, x, incx)
                                         alpha::Cfloat, x::ZePtr{ComplexF32}, incx::Int64)::Cvoid
 end
 
+function onemklSgemv(device_queue, trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklSgemv(device_queue::syclQueue_t, trans::onemklTranspose,
+                                        m::Int64, n::Int64, alpha::Cfloat, a::ZePtr{Cfloat},
+                                        lda::Int64, x::ZePtr{Cfloat}, incx::Int64, beta::Cfloat,
+                                        y::ZePtr{Cfloat}, incy::Int64)::Cvoid
+end
+
+function onemklDgemv(device_queue, trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklDgemv(device_queue::syclQueue_t, trans::onemklTranspose,
+                                        m::Int64, n::Int64, alpha::Cdouble, a::ZePtr{Cdouble},
+                                        lda::Int64, x::ZePtr{Cdouble}, incx::Int64, beta::Cdouble,
+                                        y::ZePtr{Cdouble}, incy::Int64)::Cvoid
+end
+
+function onemklCgemv(device_queue, trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklCgemv(device_queue::syclQueue_t, trans::onemklTranspose,
+                                        m::Int64, n::Int64, alpha::ComplexF32, a::ZePtr{ComplexF32},
+                                        lda::Int64, x::ZePtr{ComplexF32}, incx::Int64, beta::ComplexF32,
+                                        y::ZePtr{ComplexF32}, incy::Int64)::Cvoid
+end
+
+function onemklZgemv(device_queue, trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
+    @ccall liboneapi_support.onemklZgemv(device_queue::syclQueue_t, trans::onemklTranspose,
+                                        m::Int64, n::Int64, alpha::ComplexF64, a::ZePtr{ComplexF64},
+                                        lda::Int64, x::ZePtr{ComplexF64}, incx::Int64, beta::ComplexF64,
+                                        y::ZePtr{ComplexF64}, incy::Int64)::Cvoid
+end
+
 function onemklDnrm2(device_queue, n, x, incx, result)
 	@ccall liboneapi_support.onemklDnrm2(device_queue::syclQueue_t, 
                                 n::Int64, x::ZePtr{Cdouble}, incx::Int64, 
