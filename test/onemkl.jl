@@ -134,6 +134,62 @@ end
                 h_y = Array(d_y)
                 @test y ≈ h_y
             end
+            @testset "gbmv" begin
+                # test y = alpha*A*x
+                d_y = oneMKL.gbmv('N', m, kl, ku, alpha, d_Ab, d_x)
+                y = zeros(T,m)
+                y = BLAS.gbmv('N',m,kl,ku,alpha,Ab,x)
+                h_y = Array(d_y)
+                @test y ≈ h_y
+            end
+            A = rand(T,m,m)
+            A = A + A'
+            nbands = 3
+            @test m >= 1+nbands
+            A = bandex(A,nbands,nbands)
+            # convert to 'upper' banded storage format
+            AB = band(A,0,nbands)
+            # construct x
+            x = rand(T,m)
+            d_AB = oneArray(AB)
+            d_x = oneArray(x)
+            if T <:Union{ComplexF32,ComplexF64}
+                @testset "hbmv!" begin
+                    y = rand(T,m)
+                    d_y = oneArray(y)
+                    # hbmv!
+                    oneMKL.hbmv!('U',nbands,alpha,d_AB,d_x,beta,d_y)
+                    y = alpha*(A*x) + beta*y
+                    # compare
+                    h_y = Array(d_y)
+                    @test y ≈ h_y
+                end
+                @testset "hbmv" begin
+                    d_y = oneMKL.hbmv('U',nbands,d_AB,d_x)
+                    y = A*x
+                    # compare
+                    h_y = Array(d_y)
+                    @test y ≈ h_y
+                end
+            else
+                @testset "sbmv!" begin
+                    y = rand(T,m)
+                    d_y = oneArray(y)
+                    # sbmv!
+                    oneMKL.sbmv!('U',nbands,alpha,d_AB,d_x,beta,d_y)
+                    y = alpha*(A*x) + beta*y
+                    # compare
+                    h_y = Array(d_y)
+                    @test y ≈ h_y
+                end
+                @testset "sbmv" begin
+                    d_y = oneMKL.sbmv('U',nbands,d_AB,d_x)
+                    y = A*x
+                    # compare
+                    h_y = Array(d_y)
+                    @test y ≈ h_y
+                end
+            end
         end
 
         @testset "gemv" begin
@@ -229,49 +285,6 @@ end
             @test y ≈ hy
         end
 
-        @testset "hbmv!" begin
-            A = rand(T,m,m)
-            A = A + A'
-            nbands = 3
-            @test m >= 1+nbands
-            A = bandex(A,nbands,nbands)
-            # convert to 'upper' banded storage format
-            AB = band(A,0,nbands)
-            # construct x
-            x = rand(T,m)
-            d_AB = oneArray(AB)
-            d_x = oneArray(x)
-
-            y = rand(T,m)
-            d_y = oneArray(y)
-            # hbmv!
-            oneMKL.hbmv!('U',nbands,alpha,d_AB,d_x,beta,d_y)
-            y = alpha*(A*x) + beta*y
-            # compare
-            h_y = Array(d_y)
-            @test y ≈ h_y
-        end
-
-        @testset "hbmv" begin
-            A = rand(T,m,m)
-            A = A + A'
-            nbands = 3
-            @test m >= 1+nbands
-            A = bandex(A,nbands,nbands)
-            # convert to 'upper' banded storage format
-            AB = band(A,0,nbands)
-            # construct x
-            x = rand(T,m)
-            d_AB = oneArray(AB)
-            d_x = oneArray(x)
-
-            d_y = oneMKL.hbmv('U',nbands,d_AB,d_x)
-            y = A*x
-            # compare
-            h_y = Array(d_y)
-            @test y ≈ h_y
-        end
-
         @testset "her!" begin
             A = rand(T,m,n)
             dA = oneArray(A)
@@ -318,7 +331,7 @@ end
         end
     end
 
-    @testset "symmetric" begin
+#=    @testset "symmetric" begin
         @testset for T in intersect(eltypes, [Float32, Float64])
             alpha = rand(T)
             beta = rand(T)
@@ -577,5 +590,5 @@ end
             end
 
         end
-    end
+    end=#
 end

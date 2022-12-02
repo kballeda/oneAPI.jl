@@ -106,10 +106,10 @@ for (fname, elty) in ((:onemklChbmv,:ComplexF32),
         function hbmv!(uplo::Char,
                        k::Integer,
                        alpha::Number,
-                       A::oneStridedVecOrMat{$elty},
-                       x::oneStridedVecOrMat{$elty},
+                       A::oneStridedMatrix{$elty},
+                       x::oneStridedVector{$elty},
                        beta::Number,
-                       y::oneStridedVecOrMat{$elty})
+                       y::oneStridedVector{$elty})
             m, n = size(A)
             if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
             if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
@@ -123,13 +123,13 @@ for (fname, elty) in ((:onemklChbmv,:ComplexF32),
         end
 
         function hbmv(uplo::Char, k::Integer, alpha::Number,
-                      A::oneStridedVecOrMat{$elty}, x::oneStridedVecOrMat{$elty})
+                      A::oneStridedMatrix{$elty}, x::oneStridedVector{$elty})
             n = size(A,2)
             hbmv!(uplo, k, alpha, A, x, zero($elty), similar(x, $elty, n))
         end
 
-        function hbmv(uplo::Char, k::Integer, A::oneStridedVecOrMat{$elty},
-                      x::oneStridedVecOrMat{$elty})
+        function hbmv(uplo::Char, k::Integer, A::oneStridedMatrix{$elty},
+                      x::oneStridedVector{$elty})
             hbmv(uplo, k, one($elty), A, x)
         end
 
