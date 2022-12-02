@@ -14,6 +14,26 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+function Base.convert(::Type{onemklUplo}, uplo::Char)
+    if uplo == 'U'
+        return ONEMKL_UPLO_UPPER
+    elseif uplo == 'L'
+        return ONEMKL_UPLO_LOWER
+    else
+        throw(ArgumentError("Unknown uplo $uplo"))
+    end
+end
+
+function Base.convert(::Type{onemklSide}, side::Char)
+    if side == 'L'
+        return ONEMKL_SIDE_LEFT
+    elseif side == 'R'
+        return ONEMKL_SIDE_RIGHT
+    else
+        throw(ArgumentError("Unknown transpose $side"))
+    end
+end
+
 # level 1
 ## axpy primitive
 for (fname, elty) in 
@@ -79,6 +99,119 @@ for (fname, elty, celty) in ((:onemklCsscal, :Float32, :ComplexF32),
         end
     end
 end
+## hemm
+for (fname, elty) in ((:onemklZhemm,:ComplexF64),
+                      (:onemklChemm,:ComplexF32))
+    @eval begin
+        function hemm!(side::Char,
+                       uplo::Char,
+                       alpha::Number,
+                       A::oneStridedMatrix{$elty},
+                       B::oneStridedMatrix{$elty},
+                       beta::Number,
+                       C::oneStridedMatrix{$elty})
+            mA, nA = size(A)
+            m, n = size(B)
+            mC, nC = size(C)
+            if mA != nA throw(DimensionMismatch("A must be square")) end
+            if ((m != mC) || (n != nC)) throw(DimensionMismatch("B and C must have same dimensions")) end
+            if ((side == 'L') && (mA != m)) throw(DimensionMismatch("")) end
+            if ((side == 'R') && (mA != n)) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            ldb = max(1,stride(B,2))
+            ldc = max(1,stride(C,2))
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), side, uplo, m, n, alpha, A, lda, B, ldb, beta, C, ldc)
+            C
+        end
+        function hemm(uplo::Char,
+                      trans::Char,
+                      alpha::Number,
+                      A::oneStridedMatrix{$elty},
+                      B::oneStridedMatrix{$elty})
+            m,n = size(B)
+            hemm!( uplo, trans, alpha, A, B, zero($elty), similar(B, $elty, (m,n) ) )
+        end
+        hemm( uplo::Char, trans::Char, A::oneStridedMatrix{$elty}, B::oneStridedMatrix{$elty}) =
+            hemm( uplo, trans, one($elty), A, B)
+    end
+end
+
+## herk
+for (fname, elty) in ((:onemklZherk, :ComplexF64),
+                      (:onemklCherk, :ComplexF32))
+    @eval begin
+        function herk!(uplo::Char,
+                       trans::Char,
+                       alpha::Real,
+                       A::oneStridedVecOrMat{$elty},
+                       beta::Real,
+                       C::oneStridedMatrix{$elty})
+            mC, n = size(C)
+            if mC != n throw(DimensionMismatch("C must be square")) end
+            nn = size(A, trans == 'N' ? 1 : 2)
+            if nn != n throw(DimensionMismatch("herk!")) end
+            k  = size(A, trans == 'N' ? 2 : 1)
+            lda = max(1,stride(A,2))
+            ldc = max(1,stride(C,2))
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), uplo, trans, n, k, alpha, A, lda, beta, C, ldc)
+            C
+        end
+        function herk(uplo::Char, trans::Char, alpha::Real, A::oneStridedVecOrMat{$elty})
+            n = size(A, trans == 'N' ? 1 : 2)
+            herk!(uplo, trans, alpha, A, zero(real($elty)), similar(A, $elty, (n,n)))
+        end
+        herk(uplo::Char, trans::Char, A::oneStridedVecOrMat{$elty}) =
+            herk(uplo, trans, one(real($elty)), A)
+   end
+end
+
+## her2k
+for (fname, elty) in ((:onemklZher2k,:ComplexF64),
+                      (:onemklCher2k,:ComplexF32))
+    @eval begin
+        function her2k!(uplo::Char,
+                        trans::Char,
+                        alpha::Number,
+                        A::oneStridedVecOrMat{$elty},
+                        B::oneStridedVecOrMat{$elty},
+                        beta::Real,
+                        C::oneStridedMatrix{$elty})
+            m, n = size(C)
+            if m != n throw(DimensionMismatch("C must be square")) end
+            nA = size(A, trans == 'N' ? 1 : 2)
+            nB = size(B, trans == 'N' ? 1 : 2)
+            if nA != n throw(DimensionMismatch("First dimension of op(A) must match C")) end
+            if nB != n throw(DimensionMismatch("First dimension of op(B.') must match C")) end
+            k  = size(A, trans == 'N' ? 2 : 1)
+            if k != size(B, trans == 'N' ? 2 : 1)
+                throw(DimensionMismatch("Inner dimensions of op(A) and op(B.') must match"))
+            end
+            lda = max(1,stride(A,2))
+            ldb = max(1,stride(B,2))
+            ldc = max(1,stride(C,2))
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), uplo, trans, n, k, alpha, A, lda, B, ldb, beta, C, ldc)
+            C
+        end
+        function her2k(uplo::Char,
+                       trans::Char,
+                       alpha::Number,
+                       A::oneStridedVecOrMat{$elty},
+                       B::oneStridedVecOrMat{$elty})
+            n = size(A, trans == 'N' ? 1 : 2)
+            her2k!(uplo, trans, alpha, A, B, zero(real($elty)), similar(A, $elty, (n,n)))
+        end
+        her2k(uplo::Char,
+              trans::Char,
+              A::oneStridedVecOrMat{$elty},
+              B::oneStridedVecOrMat{$elty}) = her2k(uplo, trans, one($elty), A, B)
+   end
+end
+
+
+
 #
 # BLAS
 #
