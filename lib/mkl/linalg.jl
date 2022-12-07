@@ -140,7 +140,7 @@ for (t, uploc, isunitc) in ((:LowerTriangular, 'L', 'N'),
     end
 end
 
-#=
+
 ## adjoint/transpose multiplication ('uploc' reversed)
 for (t, uploc, isunitc) in ((:LowerTriangular, 'U', 'N'),
                             (:UnitLowerTriangular, 'U', 'U'),
@@ -170,13 +170,13 @@ for (t, uploc, isunitc) in ((:LowerTriangular, 'U', 'N'),
 
         # optimization: Base.mul! uses lmul!/rmul! with a copy (because of BLAS)
         LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::$t{<:Any,<:Transpose{T,<:oneStridedVecOrMat}},
-                           B::oneStridedVecOrMat{T}) where {T<:oneMKLFloat} =
+                           B::oneStridedVecOrMat{T}) where {T<:onemklFloat} =
             oneMKL.trmm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B, X)
         LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                           B::oneStridedVecOrMat{T}) where {T<:oneMKLComplex} =
+                           B::oneStridedVecOrMat{T}) where {T<:onemklComplex} =
             oneMKL.trmm!('L', $uploc, 'C', $isunitc, one(T), parent(parent(A)), B, X)
         LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                           B::oneStridedVecOrMat{T}) where {T<:oneMKLReal} =
+                           B::oneStridedVecOrMat{T}) where {T<:onemklReal} =
             oneMKL.trmm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B, X)
         LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::oneStridedVecOrMat{T},
                            B::$t{<:Any,<:Transpose{T,<:oneStridedVecOrMat}}) where {T<:onemklFloat} =
@@ -211,6 +211,7 @@ for (t, uploc, isunitc) in ((:LowerTriangular, 'U', 'N'),
             oneMKL.trsm!('R', $uploc, 'C', $isunitc, one(T), parent(parent(B)), A)
     end
 end
+
 
 function LinearAlgebra.mul!(X::oneStridedVecOrMat{T},
                             A::LowerTriangular{T,<:oneStridedVecOrMat},
@@ -273,7 +274,7 @@ for (trtype, valtype) in ((:Transpose, :onemklFloat),
         end
     end
 end
-=#
+
 for NT in (Number, Real)
     # NOTE: alpha/beta also ::Real to avoid ambiguities with certain Base methods
     @eval begin
