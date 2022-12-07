@@ -101,7 +101,7 @@ for (fname, elty) in ((:onemklDsyrk,:Float64),
                        alpha::Number,
                        A::oneStridedVecOrMat{$elty},
                        beta::Number,
-                       C::oneStridedMatrix{$elty})
+                       C::oneStridedVecOrMat{$elty})
             mC, n = size(C)
             if mC != n throw(DimensionMismatch("C must be square")) end
             nn = size(A, trans == 'N' ? 1 : 2)
@@ -156,22 +156,21 @@ for (fname, elty) in ((:onemklDsyr2k,:Float64),
             $fname(sycl_queue(queue), uplo, trans, n, k, alpha, A, lda, B, ldb, beta, C, ldc)
             C
         end
-
-        function syr2k(uplo::Char,
-                       trans::Char,
-                       alpha::Number,
-                       A::oneStridedVecOrMat,
-                       B::oneStridedVecOrMat)
-                T = eltype(A)
-                n = size(A, trans == 'N' ? 1 : 2)
-                syr2k!(uplo, trans, convert(T,alpha), A, B, zero(T), similar(A, T, (n, n)))
-        end
-
-        syr2k(uplo::Char, trans::Char, A::oneStridedVecOrMat, B::oneStridedVecOrMat) =
-                syr2k(uplo, trans, one(eltype(A)), A, B)
     end
 end
 
+function syr2k(uplo::Char,
+               trans::Char,
+               alpha::Number,
+               A::oneStridedVecOrMat,
+               B::oneStridedVecOrMat)
+        T = eltype(A)
+        n = size(A, trans == 'N' ? 1 : 2)
+        syr2k!(uplo, trans, convert(T,alpha), A, B, zero(T), similar(A, T, (n, n)))
+end
+
+syr2k(uplo::Char, trans::Char, A::oneStridedVecOrMat, B::oneStridedVecOrMat) =
+    syr2k(uplo, trans, one(eltype(A)), A, B)
 
 # level 1
 ## axpy primitive
