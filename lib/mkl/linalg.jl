@@ -77,9 +77,8 @@ function LinearAlgebra.dot(x::oneStridedArray{T}, y::oneStridedArray{T}) where T
 end
 
 # level 3
-
 @inline function LinearAlgebra.mul!(C::oneStridedVecOrMat{T}, A::Hermitian{T,<:oneStridedVecOrMat}, B::oneStridedVecOrMat{T},
-                            α::Number, β::Number) where {T<:Union{Float32,Float64}}
+                                    α::Number, β::Number) where {T<:Union{Float32,Float64}}
     alpha, beta = promote(α, β, zero(T))
     if alpha isa Union{Bool,T} && beta isa Union{Bool,T}
         return oneMKL.symm!('L', A.uplo, alpha, A.data, B, beta, C)
@@ -89,7 +88,7 @@ end
 end
 
 @inline function LinearAlgebra.mul!(C::oneStridedVecOrMat{T}, A::oneStridedVecOrMat{T}, B::Hermitian{T,<:oneStridedVecOrMat},
-             α::Number, β::Number) where {T<:Union{Float32,Float64}}
+                                    α::Number, β::Number) where {T<:Union{Float32,Float64}}
     alpha, beta = promote(α, β, zero(T))
     if alpha isa Union{Bool,T} && beta isa Union{Bool,T}
         return oneMKL.symm!('R', B.uplo, alpha, B.data, A, beta, C)
@@ -98,8 +97,17 @@ end
     end
 end
 
-# triangular
+@inline function LinearAlgebra.mul!(C::oneStridedVecOrMat{T}, A::Hermitian{T,<:oneStridedVecOrMat}, B::oneStridedVecOrMat{T},
+                                    α::Number, β::Number) where {T<:onemklComplex}
+    alpha, beta = promote(α, β, zero(T))
+    if alpha isa Union{Bool,T} && beta isa Union{Bool,T}
+        return oneMKL.hemm!('L', A.uplo, alpha, A.data, B, beta, C)
+    else
+        error("only supports BLAS type, got $T")
+    end
+end
 
+# triangular
 ## direct multiplication/division
 for (t, uploc, isunitc) in ((:LowerTriangular, 'L', 'N'),
                             (:UnitLowerTriangular, 'L', 'U'),
@@ -140,24 +148,12 @@ for (t, uploc, isunitc) in ((:LowerTriangular, 'L', 'N'),
     end
 end
 
-
 ## adjoint/transpose multiplication ('uploc' reversed)
 for (t, uploc, isunitc) in ((:LowerTriangular, 'U', 'N'),
                             (:UnitLowerTriangular, 'U', 'U'),
                             (:UpperTriangular, 'L', 'N'),
                             (:UnitUpperTriangular, 'L', 'U'))
     @eval begin
-        # Multiplication
-        LinearAlgebra.lmul!(A::$t{<:Any,<:Transpose{T,<:oneStridedVecOrMat}},
-                            B::oneStridedVecOrMat{T}) where {T<:onemklFloat} =
-            oneMKL.trmm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B, B)
-        LinearAlgebra.lmul!(A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                            B::oneStridedVecOrMat{T}) where {T<:Union{ComplexF32,ComplexF64}} =
-            oneMKL.trmm!('L', $uploc, 'C', $isunitc, one(T), parent(parent(A)), B, B)
-        LinearAlgebra.lmul!(A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                            B::oneStridedVecOrMat{T}) where {T<:Union{Float32,Float64}} =
-            oneMKL.trmm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B, B)
-
         LinearAlgebra.rmul!(A::oneStridedVecOrMat{T},
                             B::$t{<:Any,<:Transpose{T,<:oneStridedVecOrMat}}) where {T<:onemklFloat} =
             oneMKL.trmm!('R', $uploc, 'T', $isunitc, one(T), parent(parent(B)), A, A)
@@ -167,37 +163,6 @@ for (t, uploc, isunitc) in ((:LowerTriangular, 'U', 'N'),
         LinearAlgebra.rmul!(A::oneStridedVecOrMat{T},
                             B::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}}) where {T<:Union{Float32,Float64}} =
             oneMKL.trmm!('R', $uploc, 'T', $isunitc, one(T), parent(parent(B)), A, A)
-
-        # optimization: Base.mul! uses lmul!/rmul! with a copy (because of BLAS)
-        LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::$t{<:Any,<:Transpose{T,<:oneStridedVecOrMat}},
-                           B::oneStridedVecOrMat{T}) where {T<:onemklFloat} =
-            oneMKL.trmm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B, X)
-        LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                           B::oneStridedVecOrMat{T}) where {T<:onemklComplex} =
-            oneMKL.trmm!('L', $uploc, 'C', $isunitc, one(T), parent(parent(A)), B, X)
-        LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                           B::oneStridedVecOrMat{T}) where {T<:onemklReal} =
-            oneMKL.trmm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B, X)
-        LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::oneStridedVecOrMat{T},
-                           B::$t{<:Any,<:Transpose{T,<:oneStridedVecOrMat}}) where {T<:onemklFloat} =
-            oneMKL.trmm!('R', $uploc, 'T', $isunitc, one(T), parent(parent(B)), A, X)
-        LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::oneStridedVecOrMat{T},
-                           B::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}}) where {T<:Union{ComplexF32,ComplexF64}} =
-            oneMKL.trmm!('R', $uploc, 'C', $isunitc, one(T), parent(parent(B)), A, X)
-        LinearAlgebra.mul!(X::oneStridedVecOrMat{T}, A::oneStridedVecOrMat{T},
-                           B::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}}) where {T<:Union{Float32,Float64}} =
-            oneMKL.trmm!('R', $uploc, 'T', $isunitc, one(T), parent(parent(B)), A, X)
-
-        # Left division
-        LinearAlgebra.ldiv!(A::$t{<:Any,<:Transpose{T,<:oneStridedVecOrMat}},
-                            B::oneStridedVecOrMat{T}) where {T<:onemklFloat} =
-            oneMKL.trsm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B)
-        LinearAlgebra.ldiv!(A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                            B::oneStridedVecOrMat{T}) where {T<:Union{Float32,Float64}} =
-            oneMKL.trsm!('L', $uploc, 'T', $isunitc, one(T), parent(parent(A)), B)
-        LinearAlgebra.ldiv!(A::$t{<:Any,<:Adjoint{T,<:oneStridedVecOrMat}},
-                            B::oneStridedVecOrMat{T}) where {T<:Union{ComplexF32,ComplexF64}} =
-            oneMKL.trsm!('L', $uploc, 'C', $isunitc, one(T), parent(parent(A)), B)
 
         # Right division
         LinearAlgebra.rdiv!(A::oneStridedVecOrMat{T},
@@ -211,7 +176,6 @@ for (t, uploc, isunitc) in ((:LowerTriangular, 'U', 'N'),
             oneMKL.trsm!('R', $uploc, 'C', $isunitc, one(T), parent(parent(B)), A)
     end
 end
-
 
 function LinearAlgebra.mul!(X::oneStridedVecOrMat{T},
                             A::LowerTriangular{T,<:oneStridedVecOrMat},
@@ -274,6 +238,7 @@ for (trtype, valtype) in ((:Transpose, :onemklFloat),
         end
     end
 end
+
 
 for NT in (Number, Real)
     # NOTE: alpha/beta also ::Real to avoid ambiguities with certain Base methods
