@@ -14,6 +14,36 @@ function Base.convert(::Type{onemklTranspose}, trans::Char)
     end
 end
 
+function Base.convert(::Type{onemklSide}, side::Char)
+    if side == 'L'
+        return ONEMKL_SIDE_LEFT
+    elseif side == 'R'
+        return ONEMKL_SIDE_RIGHT
+    else
+        throw(ArgumentError("Unknown transpose $side"))
+    end
+end
+
+function Base.convert(::Type{onemklUplo}, uplo::Char)
+    if uplo == 'U'
+        return ONEMKL_UPLO_UPPER
+    elseif uplo == 'L'
+        return ONEMKL_UPLO_LOWER
+    else
+        throw(ArgumentError("Unknown uplo $uplo"))
+    end
+end
+
+function Base.convert(::Type{onemklDiag}, diag::Char)
+    if diag == 'N'
+        return ONEMKL_DIAG_NONUNIT
+    elseif diag == 'U'
+        return ONEMKL_DIAG_UNIT
+    else
+        throw(ArgumentError("Unknown transpose $diag"))
+    end
+end
+
 # level 1
 ## axpy primitive
 for (fname, elty) in 
@@ -224,5 +254,40 @@ for (fname, elty) in
                       B::oneStridedVecOrMat{$elty})
             gemm(transA, transB, one($elty), A, B)
         end
+    end
+end
+
+### tbsv, (TB) triangular banded matrix solve
+for (fname, elty) in ((:onemklStbsv,:Float32),
+                      (:onemklDtbsv,:Float64),
+                      (:onemklCtbsv,:ComplexF32),
+                      (:onemklZtbsv,:ComplexF64))
+    @eval begin
+        function tbsv!(uplo::Char,
+                       trans::Char,
+                       diag::Char,
+                       k::Integer,
+                       A::oneStridedVecOrMat{$elty},
+                       x::oneStridedVecOrMat{$elty})
+            m, n = size(A)
+            if !(1<=(1+k)<=n) throw(DimensionMismatch("Incorrect number of bands")) end
+            if m < 1+k throw(DimensionMismatch("Array A has fewer than 1+k rows")) end
+            if n != length(x) throw(DimensionMismatch("")) end
+            lda = max(1,stride(A,2))
+            incx = stride(x,1)
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), uplo, trans, diag, n, k, A, lda, x, incx)
+            x
+        end
+
+        function tbsv(uplo::Char,
+                      trans::Char,
+                      diag::Char,
+                      k::Integer,
+                      A::oneStridedVecOrMat{$elty},
+                      x::oneStridedVecOrMat{$elty})
+            tbsv!(uplo, trans, diag, k, A, copy(x))
+        end
+
     end
 end
