@@ -4,7 +4,8 @@ using oneAPI.oneMKL
 using LinearAlgebra
 
 m = 20
-
+n = 35
+k = 13
 ############################################################################################
 @testset "level 1" begin
     @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
@@ -64,6 +65,52 @@ m = 20
 
         @testset "asum" begin
             @test testf(BLAS.asum, rand(T,m))
+        end
+    end
+end
+
+@testset "level 2" begin
+    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+        alpha = rand(T)
+        beta = rand(T)
+        # generate matrices
+        bA = [rand(T,m,k) for i in 1:10]
+        bB = [rand(T,k,n) for i in 1:10]
+        bC = [rand(T,m,n) for i in 1:10]
+        # copy data to device
+        bd_A = oneArray{T, 2}[]
+        bd_B = oneArray{T, 2}[]
+        bd_C = oneArray{T, 2}[]
+        bd_bad = oneArray{T, 2}[]
+        for i in 1:length(bA)
+            push!(bd_A, oneArray(bA[i]))
+            push!(bd_B, oneArray(bB[i]))
+            push!(bd_C, oneArray(bC[i]))
+            if i < length(bA) - 2
+                push!(bd_bad, oneArray(bC[i]))
+            end
+        end
+
+        @testset "gemm_batched!" begin
+            # C = (alpha*A)*B + beta*C
+            oneMKL.gemm_batched!('N','N',alpha,bd_A,bd_B,beta,bd_C)
+            for i in 1:length(bd_C)
+                bC[i] = (alpha*bA[i])*bB[i] + beta*bC[i]
+                h_C = Array(bd_C[i])
+                #compare
+                @test bC[i] ≈ h_C
+            end
+            @test_throws DimensionMismatch oneMKL.gemm_batched!('N','N',alpha,bd_A,bd_bad,beta,bd_C)
+        end
+
+        @testset "gemm_batched" begin
+            bd_C = oneMKL.gemm_batched('N','N',bd_A,bd_B)
+            for i in 1:length(bA)
+                bC = bA[i]*bB[i]
+                h_C = Array(bd_C[i])
+                @test bC ≈ h_C
+            end
+            @test_throws DimensionMismatch oneMKL.gemm_batched('N','N',alpha,bd_A,bd_bad)
         end
     end
 end

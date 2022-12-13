@@ -39,6 +39,29 @@ int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
                 const double _Complex *B, int64_t ldb, double _Complex beta,
                 double _Complex *C, int64_t ldc);
 
+void onemklSgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                    onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                    float alpha, const float *a, int64_t lda, int64_t stride_a,
+                    const float *b, int64_t ldb, int64_t stride_b, float beta,
+                    float *c, int64_t ldc, int64_t stride_c, int64_t batch_size);
+void onemklDgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                    onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                    double alpha, const double *a, int64_t lda, int64_t stride_a,
+                    const double *b, int64_t ldb, int64_t stride_b, double beta,
+                    double *c, int64_t ldc, int64_t stride_c, int64_t batch_size);
+void onemklCgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                    onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                    float _Complex alpha, const float _Complex *a, int64_t lda,
+                    int64_t stride_a, const float _Complex *b, int64_t ldb,
+                    int64_t stride_b, float _Complex beta, float _Complex *c,
+                    int64_t ldc, int64_t stride_c, int64_t batch_size);
+void onemklZgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                    onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                    double _Complex alpha, const double _Complex *a, int64_t lda,
+                    int64_t stride_a, const double _Complex *b, int64_t ldb,
+                    int64_t stride_b, double _Complex beta, double _Complex *c,
+                    int64_t ldc, int64_t stride_c, int64_t batch_size);
+
 void onemklSasum(syclQueue_t device_queue, int64_t n,
                 const float *x, int64_t incx, float *result);
 void onemklDasum(syclQueue_t device_queue, int64_t n,

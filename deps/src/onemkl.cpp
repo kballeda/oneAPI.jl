@@ -87,6 +87,54 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
     return 0;
 }
 
+extern "C" void onemklSgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                                onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                                float alpha, const float *a, int64_t lda, int64_t stride_a,
+                                const float *b, int64_t ldb, int64_t stride_b, float beta,
+                                float *c, int64_t ldc, int64_t stride_c, int64_t batch_size) {
+    oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, convert(transa),
+                                convert(transb), m, n, k, alpha, a, lda, stride_a,
+                                b, ldb, stride_b, beta, c, ldc, stride_c, batch_size);
+}
+
+extern "C" void onemklDgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                                onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                                double alpha, const double *a, int64_t lda, int64_t stride_a,
+                                const double *b, int64_t ldb, int64_t stride_b, double beta,
+                                double *c, int64_t ldc, int64_t stride_c, int64_t batch_size) {
+    oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, convert(transa),
+                                convert(transb), m, n, k, alpha, a, lda, stride_a,
+                                b, ldb, stride_b, beta, c, ldc, stride_c, batch_size);
+}
+
+extern "C" void onemklCgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                                onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                                float _Complex alpha, const float _Complex *a, int64_t lda,
+                                int64_t stride_a, const float _Complex *b, int64_t ldb,
+                                int64_t stride_b, float _Complex beta, float _Complex *c,
+                                int64_t ldc, int64_t stride_c, int64_t batch_size) {
+    oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, convert(transa),
+                                convert(transb), m, n, k, static_cast<std::complex<float> >(alpha),
+                                reinterpret_cast<const std::complex<float> *>(a), lda, stride_a,
+                                reinterpret_cast<const std::complex<float> *>(b), ldb, stride_b,
+                                beta, reinterpret_cast<std::complex<float> *>(c), ldc, stride_c,
+                                batch_size);
+}
+
+extern "C" void onemklZgemm_batch(syclQueue_t device_queue, onemklTranspose transa,
+                                onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                                double _Complex alpha, const double _Complex *a, int64_t lda,
+                                int64_t stride_a, const double _Complex *b, int64_t ldb,
+                                int64_t stride_b, double _Complex beta, double _Complex *c,
+                                int64_t ldc, int64_t stride_c, int64_t batch_size) {
+    oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, convert(transa),
+                                convert(transb), m, n, k, static_cast<std::complex<double> >(alpha),
+                                reinterpret_cast<const std::complex<double> *>(a), lda, stride_a,
+                                reinterpret_cast<const std::complex<double> *>(b), ldb, stride_b,
+                                beta, reinterpret_cast<std::complex<double> *>(c), ldc, stride_c,
+                                batch_size);
+}
+
 extern "C" void onemklSasum(syclQueue_t device_queue, int64_t n, 
                             const float *x, int64_t incx,
                             float *result) {
