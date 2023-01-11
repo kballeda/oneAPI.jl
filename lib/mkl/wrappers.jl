@@ -722,6 +722,9 @@ for (fname, elty) in
         end
     end
 end
+function copy!(n::Integer, x::oneStridedArray{T}, y::oneStridedArray{T}) where {T <: Union{Float16, ComplexF16}}
+    copyto!(y,x)
+end
 
 ## asum
 for (fname, elty, ret_type) in 

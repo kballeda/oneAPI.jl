@@ -78,6 +78,12 @@ k = 13
 
         end
     end
+    @testset for T in [Float16, ComplexF16]
+        A = oneArray(rand(T, m))
+        B = oneArray{T}(undef, m)
+        oneMKL.copy!(m,A,B)
+        @test Array(A) == Array(B)
+    end
 end
 
 @testset "level 2" begin
