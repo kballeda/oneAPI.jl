@@ -522,6 +522,15 @@ for (fname, elty) in
     end
 end
 
+function axpy!(n::Integer, alpha::Number, dx::oneStridedArray{<:Union{Float16,ComplexF16}}, dy::oneStridedArray{<:Union{Float16,ComplexF16}})
+    wide_x = widen.(dx)
+    wide_y = widen.(dy)
+    axpy!(n, alpha, wide_x, wide_y)
+    thin_y = convert(typeof(dy), wide_y)
+    copyto!(dy, thin_y)
+    return dy
+end
+
 ## scal
 for (fname, elty) in
     ((:onemklDscal,:Float64),

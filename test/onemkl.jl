@@ -83,6 +83,10 @@ k = 13
         B = oneArray{T}(undef, m)
         oneMKL.copy!(m,A,B)
         @test Array(A) == Array(B)
+
+        # axpy float16 test
+        alpha = rand(T,1)
+        @test testf(axpy!, alpha[1], rand(T,m), rand(T,m))
     end
 end
 
