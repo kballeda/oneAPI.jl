@@ -76,6 +76,15 @@ function onemklCgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ld
                                     C::ZePtr{ComplexF32}, ldc::Int64)::Cint
 end
 
+function onemklHgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
+    ldc)
+@ccall liboneapi_support.onemklHgemm(device_queue::syclQueue_t, transA::onemklTranspose,
+                   transB::onemklTranspose, m::Int64, n::Int64, k::Int64,
+                   alpha::Float16, A::ZePtr{Float16}, lda::Int64,
+                   B::ZePtr{Float16}, ldb::Int64, beta::Float16,
+                   C::ZePtr{Float16}, ldc::Int64)::Cint
+end
+
 function onemklZgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)
     @ccall liboneapi_support.onemklZgemm(device_queue::syclQueue_t, transA::onemklTranspose,

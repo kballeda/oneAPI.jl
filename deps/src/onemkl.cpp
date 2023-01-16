@@ -53,12 +53,15 @@ oneapi::mkl::side convert(onemklSide val) {
 
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                            onemklTranspose transB, int64_t m, int64_t n,
-                           int64_t k, sycl::half alpha, const sycl::half *A, int64_t lda,
-                           const sycl::half *B, int64_t ldb, sycl::half beta, sycl::half *C,
+                           int64_t k, short alpha, const short *A, int64_t lda,
+                           const short *B, int64_t ldb, short beta, short *C,
                            int64_t ldc) {
     auto status = oneapi::mkl::blas::column_major::gemm(device_queue->val, convert(transA),
-                                          convert(transB), m, n, k, alpha, A,
-                                          lda, B, ldb, beta, C, ldc);
+                                          convert(transB), m, n, k, static_cast<sycl::half>(alpha),
+                                          reinterpret_cast<const sycl::half* >(A), lda,
+                                          reinterpret_cast<const sycl::half* >(B), ldb,
+                                          static_cast<sycl::half>(beta),
+                                          reinterpret_cast<sycl::half* >(C), ldc);
     __FORCE_MKL_FLUSH__(status);
     return 0;
 }
