@@ -817,5 +817,34 @@ end
                 @test C ≈ h_C
             end
         end
+        @testset "gemm!" begin
+            A = rand(T,m,k)
+            B = rand(T,k,n)
+            Bbad = rand(T,k+1,n+1)
+            C1 = rand(T,m,n)
+            C2 = copy(C1)
+            d_A = oneArray(A)
+            d_B = oneArray(B)
+            d_Bbad = oneArray(Bbad)
+            d_C1 = oneArray(C1)
+            d_C2 = oneArray(C2)
+            hA = rand(T,m,m)
+            hA = hA + hA'
+            dhA = oneArray(hA)
+            sA = rand(T,m,m)
+            sA = sA + transpose(sA)
+            dsA = oneArray(sA)
+            oneMKL.gemm!('N','N',alpha,d_A,d_B,beta,d_C1)
+            mul!(d_C2, d_A, d_B)
+            h_C1 = Array(d_C1)
+            h_C2 = Array(d_C2)
+            C1 = (alpha*A)*B + beta*C1
+            C2 = A*B
+            # compare
+            @test C1 ≈ h_C1
+            @test C2 ≈ h_C2
+            @test_throws ArgumentError mul!(dhA, dhA, dsA)
+            @test_throws DimensionMismatch mul!(d_C1, d_A, dsA)
+        end
     end
 end
