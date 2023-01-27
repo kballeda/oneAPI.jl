@@ -54,6 +54,13 @@ int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
                 const double _Complex *B, int64_t ldb, double _Complex beta,
                 double _Complex *C, int64_t ldc);
 
+void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose transa,
+                                  onemklTranspose transb, int64_t m,
+                                  int64_t n, int64_t k, float alpha,
+                                  const float **a, int64_t lda, const float **b,
+                                  int64_t ldb, float beta, float **c,
+                                  int64_t ldc, int64_t group_count);
+
 void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
                 onemklUplo upper_lower, int64_t m, int64_t n,
                 float alpha, const float *a, int64_t lda, const float *b,

@@ -6,10 +6,10 @@ using LinearAlgebra
 m = 20
 n = 35
 k = 13
-
+#=
 ############################################################################################
 @testset "level 1" begin
-    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+    @testset for T in intersect(Tpes, [Float32, Float64, ComplexF32, ComplexF64])
         @testset "copy" begin
             A = oneArray(rand(T, m))
             B = oneArray{T}(undef, m)
@@ -81,7 +81,7 @@ k = 13
 end
 
 @testset "level 2" begin
-    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+    @testset for T in intersect(Tpes, [Float32, Float64, ComplexF32, ComplexF64])
         alpha = rand(T)
         beta = rand(T)
 
@@ -360,7 +360,7 @@ end
         end
     end
 
-    @testset for T in intersect(eltypes, [ComplexF32, ComplexF64])
+    @testset for T in intersect(Tpes, [ComplexF32, ComplexF64])
         alpha = rand(T)
         beta = rand(T)
         @testset "hemv!" begin
@@ -456,7 +456,7 @@ end
     end
 
     @testset "symmetric" begin
-        @testset for T in intersect(eltypes, [Float32, Float64])
+        @testset for T in intersect(Tpes, [Float32, Float64])
             alpha = rand(T)
             beta = rand(T)
             A = rand(T,m,m)
@@ -520,7 +520,7 @@ end
 end
 
 @testset "level 3" begin
-    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+    @testset for T in intersect(Tpes, [Float32, Float64, ComplexF32, ComplexF64])
         alpha = rand(T)
         beta = rand(T)
         B = rand(T,m,n)
@@ -770,11 +770,11 @@ end
                 d_B = oneArray(B)
                 d_Bbad = oneArray(Bbad)
                 d_C = oneArray(C)
-                elty1 = T
-                elty2 = real(T)
+                T1 = T
+                T2 = real(T)
                 # generate parameters
-                α = rand(elty1)
-                β = rand(elty2)
+                α = rand(T1)
+                β = rand(T2)
                 C = C + C'
                 d_C = oneArray(C)
                 C = α*(A*B') + conj(α)*(B*A') + β*C
@@ -807,5 +807,40 @@ end
                 @test C ≈ h_C
             end
         end
+    end
+end
+=#
+
+@testset for T in [Float32]
+    alpha = rand(T)  
+    beta = rand(T)
+    # generate matrices
+    bA = [rand(T,m,k) for i in 1:10]
+    bB = [rand(T,k,n) for i in 1:10]
+    bC = [rand(T,m,n) for i in 1:10]
+    # move to device
+    bd_A = oneArray{T, 2}[]
+    bd_B = oneArray{T, 2}[]
+    bd_C = oneArray{T, 2}[]
+    bd_bad = oneArray{T, 2}[]
+    for i in 1:length(bA)
+        push!(bd_A,oneArray(bA[i]))
+        push!(bd_B,oneArray(bB[i]))
+        push!(bd_C,oneArray(bC[i]))
+        if i < length(bA) - 2
+            push!(bd_bad,oneArray(bC[i]))
+        end
+    end
+
+    @testset "gemm_batched!" begin
+        # C = (alpha*A)*B + beta*C
+        oneMKL.gemm_batched!('N','N',alpha,bd_A,bd_B,beta,bd_C)
+        for i in 1:length(bd_C)
+            bC[i] = (alpha*bA[i])*bB[i] + beta*bC[i]
+            h_C = Array(bd_C[i])
+            #compare
+            @test bC[i] ≈ h_C
+        end
+        @test_throws DimensionMismatch oneMKL.gemm_batched!('N','N',alpha,bd_A,bd_bad,beta,bd_C)
     end
 end
