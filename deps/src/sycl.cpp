@@ -47,10 +47,10 @@ extern "C" int syclContextDestroy(syclContext_t obj) {
     return 0;
 }
 
-extern "C" int syclQueueCreate(syclQueue_t *obj, syclContext_t context,syclDevice_t device,
+extern "C" int syclQueueCreate(syclQueue_t *obj, syclContext_t context,
+                               syclDevice_t device,
                                ze_command_queue_handle_t queue,
                                int keep_ownership) {
-    // XXX: ownership argument only used on master
     auto sycl_queue = sycl::ext::oneapi::level_zero::make_queue(context->val, device->val, (pi_native_handle) queue, keep_ownership);
     *obj = new syclQueue_st({sycl_queue});
     return 0;

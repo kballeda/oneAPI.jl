@@ -21,10 +21,12 @@ Runtime](https://github.com/intel/compute-runtime), only available on Linux.
 This package is still under significant development, so expect bugs and missing features.
 
 
-## Installation
+## Quick start
 
 You need to use Julia 1.6 or higher, and it is strongly advised to use [the official
 binaries](https://julialang.org/downloads/). For now, only Linux is supported.
+**If you're using Alchemist hardware, you need to use at least Linux 6.2.** For other
+hardware, any recent Linux distribution should work.
 
 Once you have installed Julia, proceed by entering the package manager REPL mode by pressing
 `]` and adding theoneAPI package:
@@ -38,18 +40,45 @@ oneAPI loader, several SPIR-V tools, etc. For now, the oneAPI.jl package also de
 [the Intel implementation](https://github.com/intel/compute-runtime) of the oneAPI spec.
 That means you need compatible hardware; refer to the Intel documentation for more details.
 
-Once you have oneAPI.jl installed, you can perform a smoke-test using the low-level wrappers
-for the Level Zero library:
+Once you have oneAPI.jl installed, perform a smoke test by calling the `versioninfo()` function:
 
 ```julia
 julia> using oneAPI
 
-julia> using oneAPI.oneL0
+julia> oneAPI.versioninfo()
+Binary dependencies:
+- NEO_jll: 22.43.24595+0
+- libigc_jll: 1.0.12504+0
+- gmmlib_jll: 22.3.0+0
+- SPIRV_LLVM_Translator_unified_jll: 0.2.0+0
+- SPIRV_Tools_jll: 2022.1.0+0
 
-julia> drv = first(drivers());
+Toolchain:
+- Julia: 1.8.5
+- LLVM: 13.0.1
 
-julia> dev = first(devices(drv))
-ZeDevice(GPU, vendor 0x8086, device 0x1912): Intel(R) Gen9
+1 driver:
+- 00000000-0000-0000-173d-d94201036013 (v1.3.24595, API v1.3.0)
+
+2 devices:
+- Intel(R) Graphics [0x56a0]
+- Intel(R) HD Graphics P630 [0x591d]
+```
+
+If you have multiple compatible drivers or devices, use the `driver!` and `device!`
+functions to configure which one to use in the current task:
+
+```julia
+julia> devices()
+ZeDevice iterator for 2 devices:
+1. Intel(R) Graphics [0x56a0]
+2. Intel(R) HD Graphics P630 [0x591d]
+
+julia> device()
+ZeDevice(GPU, vendor 0x8086, device 0x56a0): Intel(R) Graphics [0x56a0]
+
+julia> device!(2)
+ZeDevice(GPU, vendor 0x8086, device 0x591d): Intel(R) HD Graphics P630 [0x591d]
 ```
 
 To ensure other functionality works as expected, you can run the test suite from the package
@@ -62,9 +91,9 @@ pkg> test oneAPI
 Testing finished in 16 minutes, 27 seconds, 506 milliseconds
 
 Test Summary: | Pass  Total  Time
-  Overall     | 4945   4945      
+  Overall     | 4945   4945
     SUCCESS
-     Testing oneAPI tests passed 
+     Testing oneAPI tests passed
 ```
 
 
@@ -185,8 +214,9 @@ kernel programming capabilties, and as a demonstration of that it fully implemen
 GPUArrays.jl array interfaces. This results in a full-featured GPU array type.
 
 However, the package has not been extensively tested, and performance issues might be
-present. There is no integration with vendor libraries like oneMKL or oneDNN, and as a
-result certain operations (like matrix multiplication) will be unavailable or slow.
+present. The integration with vendor libraries like oneMKL or oneDNN is still in
+development, and as result certain operations (like matrix multiplication) may be
+unavailable or slow.
 
 
 ## Using a local toolchain
@@ -224,3 +254,39 @@ The discovered paths will be written to a global file with preferences, typicall
 `$HOME/.julia/environments/vX.Y/LocalPreferences.toml` (where `vX.Y` refers to the Julia
 version you are using). You can modify this file, or remove it when you want to revert to
 default set of binaries.
+
+
+## `Float64` support
+
+Not all oneAPI GPUs support Float64 datatypes. You can test if your GPU does using
+the following code:
+
+```julia
+julia> using oneAPI
+julia> oneL0.module_properties(device()).fp64flags & oneL0.ZE_DEVICE_MODULE_FLAG_FP64 == oneL0.ZE_DEVICE_MODULE_FLAG_FP64
+false
+```
+
+If your GPU doesn't, executing code that relies on Float64 values will result in an error:
+
+```julia
+julia> oneArray([1.]) .+ 1
+┌ Error: Module compilation failed:
+│
+│ error: Double type is not supported on this platform.
+```
+
+Since it is easy to run into code that relies on Float64 values, it might be
+interesting to enable Float64 emulation when initially porting code to oneAPI.jl.
+This can be accomplished by setting two environment variables:
+
+```julia
+julia> ENV["OverrideDefaultFP64Settings"] = "1"
+julia> ENV["IGC_EnableDPEmulation"] = "1"
+julia> using oneAPI
+julia> oneL0.module_properties(device()).fp64flags & oneL0.ZE_DEVICE_MODULE_FLAG_FP64 == oneL0.ZE_DEVICE_MODULE_FLAG_FP64
+true
+julia> oneArray([1.]) .+ 1
+1-element oneVector{Float64, oneAPI.oneL0.DeviceBuffer}:
+ 2.0
+```
