@@ -589,6 +589,15 @@ extern "C" void onemklZaxpy(syclQueue_t device_queue, int64_t n, double _Complex
     __FORCE_MKL_FLUSH__(status);
 }
 
+extern "C" void onemklHaxpy(syclQueue_t device_queue, int64_t n, uint16_t alpha,
+                            const short *x, std::int64_t incx, short *y, int64_t incy) {
+    auto status = oneapi::mkl::blas::column_major::axpy(device_queue->val, n,
+                                        sycl::bit_cast<sycl::half>(alpha),
+                                        reinterpret_cast<const sycl::half *>(x),
+                                        incx, reinterpret_cast<sycl::half *>(y), incy);
+    __FORCE_MKL_FLUSH__(status);
+}
+
 // Support Level-1: SCAL primitive
 extern "C" void onemklDscal(syclQueue_t device_queue, int64_t n, double alpha,
                             double *x, int64_t incx) {

@@ -51,7 +51,7 @@ end
 
 LinearAlgebra.BLAS.asum(x::oneStridedVecOrMat{<:onemklFloat}) = oneMKL.asum(length(x), x)
 
-function LinearAlgebra.axpy!(alpha::Number, x::oneStridedVecOrMat{T}, y::oneStridedVecOrMat{T}) where T<:onemklFloat
+function LinearAlgebra.axpy!(alpha::Number, x::oneStridedVecOrMat{T}, y::oneStridedVecOrMat{T}) where T<:Union{onemklHalf,onemklFloat}
     length(x)==length(y) || throw(DimensionMismatch("axpy arguments have lengths $(length(x)) and $(length(y))"))
     oneMKL.axpy!(length(x), alpha, x, y)
 end

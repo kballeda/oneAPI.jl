@@ -235,6 +235,8 @@ void onemklCaxpy(syclQueue_t device_queue, int64_t n, float _Complex alpha,
                 const float _Complex *x, int64_t incx, float _Complex *y, int64_t incy);
 void onemklZaxpy(syclQueue_t device_queue, int64_t n, double _Complex alpha,
                 const double _Complex *x, int64_t incx, double _Complex *y, int64_t incy);
+void onemklHaxpy(syclQueue_t device_queue, int64_t n, uint16_t alpha, const short *x,
+                int64_t incx, short *y, int64_t incy);
 
 // Level-1: scal oneMKL
 void onemklDscal(syclQueue_t device_queue, int64_t n, double alpha, 

@@ -507,6 +507,7 @@ end
 for (fname, elty) in 
         ((:onemklDaxpy,:Float64),
          (:onemklSaxpy,:Float32),
+         (:onemklHaxpy,:Float16),
          (:onemklZaxpy,:ComplexF64),
          (:onemklCaxpy,:ComplexF32))
     @eval begin
@@ -522,13 +523,16 @@ for (fname, elty) in
     end
 end
 
-function axpy!(n::Integer, alpha::Number, dx::oneStridedArray{<:Union{Float16,ComplexF16}}, dy::oneStridedArray{<:Union{Float16,ComplexF16}})
-    wide_x = widen.(dx)
-    wide_y = widen.(dy)
+function axpy!(n::Integer, 
+            alpha::Number,
+            x::oneStridedArray{ComplexF16},
+            y::oneStridedArray{ComplexF16})
+    wide_x = widen.(x)
+    wide_y = widen.(y)
     axpy!(n, alpha, wide_x, wide_y)
-    thin_y = convert(typeof(dy), wide_y)
-    copyto!(dy, thin_y)
-    return dy
+    thin_y = convert(typeof(y), wide_y)
+    copyto!(y, thin_y)
+    return y
 end
 
 ## scal

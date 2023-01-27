@@ -78,15 +78,17 @@ k = 13
 
         end
     end
+
     @testset for T in [Float16, ComplexF16]
         A = oneArray(rand(T, m))
         B = oneArray{T}(undef, m)
         oneMKL.copy!(m,A,B)
         @test Array(A) == Array(B)
 
-        # axpy float16 test
-        alpha = rand(T,1)
-        @test testf(axpy!, alpha[1], rand(T,m), rand(T,m))
+        @testset "axpy" begin
+            alpha = rand(T,1)
+            @test testf(axpy!, alpha[1], rand(T,m), rand(T,m))
+        end
     end
 end
 
@@ -818,6 +820,7 @@ end
             end
         end
     end
+
     @testset for T in intersect(eltypes, [Float16, Float32, Float64, ComplexF32, ComplexF64])
         @testset "gemm!" begin
             alpha = rand(T)
