@@ -292,6 +292,12 @@ function onemklZher2k(device_queue, upper_lower, trans, n, k, alpha, a, lda, b, 
                                           beta::Cdouble, c::ZePtr{ComplexF64}, ldc::Int64)::Cvoid
 end
 
+function onemklHdot(device_queue, n, x, incx, y, incy, result)
+    @ccall liboneapi_support.onemklHdot(device_queue::syclQueue_t, n::Int64,
+                                        x::ZePtr{Float16}, incx::Int64, y::ZePtr{Float16},
+                                        incy::Int64, result::RefOrZeRef{Float16})::Cvoid
+end
+
 function onemklSdot(device_queue, n, x, incx, y, incy, result)
     @ccall liboneapi_support.onemklSdot(device_queue::syclQueue_t, n::Int64,
                                         x::ZePtr{Cfloat}, incx::Int64, y::ZePtr{Cfloat},

@@ -477,6 +477,16 @@ extern "C" void onemklSdot(syclQueue_t device_queue, int64_t n,
     __FORCE_MKL_FLUSH__(status);
 }
 
+extern "C" void onemklHdot(syclQueue_t device_queue, int64_t n,
+                           const short *x, int64_t incx, const short *y,
+                           int64_t incy, short *result) {
+    auto status = oneapi::mkl::blas::column_major::dot(device_queue->val, n,
+                                        reinterpret_cast<const sycl::half *>(x),
+                                        incx, reinterpret_cast<const sycl::half *>(y),
+                                        incy, reinterpret_cast<sycl::half *>(result));
+    __FORCE_MKL_FLUSH__(status);
+}
+
 extern "C" void onemklDdot(syclQueue_t device_queue, int64_t n,
                            const double *x, int64_t incx, const double *y,
                            int64_t incy, double *result) {

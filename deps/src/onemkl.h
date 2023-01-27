@@ -360,6 +360,8 @@ void onemklZnrm2(syclQueue_t device_queue, int64_t n, const double _Complex *x,
 void onemklHnrm2(syclQueue_t device_queue, int64_t n, const short *x,
                  int64_t incx, short *result);
 
+void onemklHdot(syclQueue_t device_queue, int64_t n, const short *x,
+                int64_t incx, const short *y, int64_t incy, short *result);
 void onemklSdot(syclQueue_t device_queue, int64_t n, const float *x,
                 int64_t incx, const float *y, int64_t incy, float *result);
 void onemklDdot(syclQueue_t device_queue, int64_t n, const double *x,

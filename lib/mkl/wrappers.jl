@@ -582,6 +582,7 @@ end
 for (jname, fname, elty) in
         ((:dot, :onemklSdot,:Float32),
          (:dot, :onemklDdot,:Float64),
+         (:dot, :onemklHdot,:Float16),
          (:dotc, :onemklCdotc, :ComplexF32),
          (:dotc, :onemklZdotc, :ComplexF64),
          (:dotu, :onemklCdotu, :ComplexF32),
@@ -597,6 +598,14 @@ for (jname, fname, elty) in
             return res[1]
         end
     end
+end
+
+function dotc(n::Integer, x::oneStridedArray{ComplexF16}, y::oneStridedArray{ComplexF16})
+    convert(ComplexF16, dotc(n, convert(oneArray{ComplexF32}, x), convert(oneArray{ComplexF32}, y)))
+end
+
+function dotu(n::Integer, x::oneStridedArray{ComplexF16}, y::oneStridedArray{ComplexF16})
+    convert(ComplexF16, dotu(n, convert(oneArray{ComplexF32}, x), convert(oneArray{ComplexF32}, y)))
 end
 
 # level 2

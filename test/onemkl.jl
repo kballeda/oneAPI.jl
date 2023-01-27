@@ -80,17 +80,27 @@ k = 13
     end
 
     @testset for T in [Float16, ComplexF16]
+        alpha = rand(T,1)
         A = oneArray(rand(T, m))
         B = oneArray{T}(undef, m)
         oneMKL.copy!(m,A,B)
         @test Array(A) == Array(B)
 
-        @testset "axpy" begin
-            alpha = rand(T,1)
-            @test testf(axpy!, alpha[1], rand(T,m), rand(T,m))
-        end
-        if T <: Float16
-            @test testf(norm, rand(T,m))
+        @test testf(axpy!, alpha[1], rand(T,m), rand(T,m))
+        @test testf(norm, rand(T,m))
+        @test testf(dot, rand(T, m), rand(T, m))
+        @test testf(*, transpose(rand(T, m)), rand(T,m))
+        @test testf(*, rand(T, m)', rand(T,m))
+
+        if T <: ComplexF16
+            @test testf(dot, rand(T, m), rand(T, m))
+            x = rand(T, m)
+            y = rand(T, m)
+            dx = oneArray(x)
+            dy = oneArray(y)
+            dz = dot(dx, dy)
+            z = dot(x, y)
+            @test dz ≈ z
         end
     end
 end
