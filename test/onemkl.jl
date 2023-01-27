@@ -92,7 +92,7 @@ k = 13
         @test testf(*, transpose(rand(T, m)), rand(T,m))
         @test testf(*, rand(T, m)', rand(T,m))
         @test testf(rmul!, rand(T,m), alpha[1])
-        
+
         if T <: ComplexF16
             @test testf(dot, rand(T, m), rand(T, m))
             x = rand(T, m)
@@ -866,6 +866,14 @@ end
             @test C2 ≈ h_C2
             @test_throws ArgumentError mul!(dhA, dhA, dsA)
             @test_throws DimensionMismatch mul!(d_C1, d_A, dsA)
+
+            d_c = oneMKL.gemm('N', 'N', d_A, d_B)
+            C = A * B
+            C2 = d_A * d_B
+            h_C = Array(d_c)
+            h_C2 = Array(C2)
+            @test C ≈ h_C
+            @test C ≈ h_C2
         end
     end
 end
