@@ -817,7 +817,11 @@ end
                 @test C ≈ h_C
             end
         end
+    end
+    @testset for T in intersect(eltypes, [Float16, Float32, Float64, ComplexF32, ComplexF64])
         @testset "gemm!" begin
+            alpha = rand(T)
+            beta = rand(T)
             A = rand(T,m,k)
             B = rand(T,k,n)
             Bbad = rand(T,k+1,n+1)

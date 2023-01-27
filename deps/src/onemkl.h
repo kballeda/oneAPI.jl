@@ -56,8 +56,8 @@ int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
 
 int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                 onemklTranspose transB, int64_t m, int64_t n,
-                int64_t k, short alpha, const short *A, int64_t lda,
-                const short *B, int64_t ldb, short beta, short *C,
+                int64_t k, uint16_t alpha, const short *A, int64_t lda,
+                const short *B, int64_t ldb, uint16_t beta, short *C,
                 int64_t ldc);
 
 void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
