@@ -62,7 +62,7 @@ LinearAlgebra.rmul!(x::oneStridedVecOrMat{<:onemklFloat}, k::Number) =
 # Work around ambiguity with GPUArrays wrapper
 LinearAlgebra.rmul!(x::oneStridedVecOrMat{<:onemklFloat}, k::Real) =
 	invoke(rmul!, Tuple{typeof(x), Number}, x, k)
-LinearAlgebra.norm(x::oneStridedVecOrMat{<:onemklFloat}) = oneMKL.nrm2(length(x), x)
+LinearAlgebra.norm(x::oneStridedVecOrMat{<:Union{Float16,ComplexF16,onemklFloat}}) = oneMKL.nrm2(length(x), x)
 
 function LinearAlgebra.dot(x::oneStridedArray{T}, y::oneStridedArray{T}) where T<:Union{Float32, Float64}
     n = length(x)

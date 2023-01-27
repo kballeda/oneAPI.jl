@@ -648,7 +648,6 @@ extern "C" void onemklZdscal(syclQueue_t device_queue, int64_t n,
     __FORCE_MKL_FLUSH__(status);
 }
 
-
 extern "C" void onemklSgemv(syclQueue_t device_queue, onemklTranspose trans,
                             int64_t m, int64_t n, float alpha, const float *a,
                             int64_t lda, const float *x, int64_t incx, float beta,
@@ -988,6 +987,14 @@ extern "C" void onemklDnrm2(syclQueue_t device_queue, int64_t n, const double *x
 extern "C" void onemklSnrm2(syclQueue_t device_queue, int64_t n, const float *x, 
                             int64_t incx, float *result) {
     auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n, x, incx, result);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklHnrm2(syclQueue_t device_queue, int64_t n, const short *x,
+                            int64_t incx, short *result) {
+    auto status = oneapi::mkl::blas::column_major::nrm2(device_queue->val, n,
+                        reinterpret_cast<const sycl::half *>(x), incx,
+                        reinterpret_cast<sycl::half *>(result));
     __FORCE_MKL_FLUSH__(status);
 }
 

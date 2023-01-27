@@ -357,6 +357,8 @@ void onemklCnrm2(syclQueue_t device_queue, int64_t n, const float _Complex *x,
                  int64_t incx, float *result);
 void onemklZnrm2(syclQueue_t device_queue, int64_t n, const double _Complex *x, 
                  int64_t incx, double *result);
+void onemklHnrm2(syclQueue_t device_queue, int64_t n, const short *x,
+                 int64_t incx, short *result);
 
 void onemklSdot(syclQueue_t device_queue, int64_t n, const float *x,
                 int64_t incx, const float *y, int64_t incy, float *result);

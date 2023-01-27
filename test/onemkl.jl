@@ -89,6 +89,9 @@ k = 13
             alpha = rand(T,1)
             @test testf(axpy!, alpha[1], rand(T,m), rand(T,m))
         end
+        if T <: Float16
+            @test testf(norm, rand(T,m))
+        end
     end
 end
 

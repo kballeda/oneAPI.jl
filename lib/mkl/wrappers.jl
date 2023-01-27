@@ -556,6 +556,7 @@ end
 for (fname, elty, ret_type) in
     ((:onemklDnrm2, :Float64,:Float64),
      (:onemklSnrm2, :Float32,:Float32),
+     (:onemklHnrm2, :Float16,:Float16),
      (:onemklCnrm2, :ComplexF32,:Float32),
      (:onemklZnrm2, :ComplexF64,:Float64))
     @eval begin
@@ -567,6 +568,14 @@ for (fname, elty, ret_type) in
             return res[1]
         end
     end
+end
+
+nrm2(x::oneStridedArray) = nrm2(length(x), x)
+
+function nrm2(n::Integer, x::oneStridedArray{ComplexF16})
+    wide_x = widen.(x)
+    nrm = nrm2(n, wide_x)
+    return convert(Float16, nrm)
 end
 
 ## dot
