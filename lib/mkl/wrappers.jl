@@ -539,6 +539,7 @@ end
 for (fname, elty) in
     ((:onemklDscal,:Float64),
      (:onemklSscal,:Float32),
+     (:onemklHscal,:Float16),
      (:onemklZscal,:ComplexF64),
      (:onemklCscal,:ComplexF32))
     @eval begin
@@ -657,6 +658,16 @@ for (fname, elty, celty) in ((:onemklCsscal, :Float32, :ComplexF32),
             $fname(sycl_queue(queue), n, alpha, x, stride(x,1))
         end
     end
+end
+
+function scal!(n::Integer,
+            alpha::Number,
+            x::oneStridedArray{ComplexF16})
+    wide_x = widen.(x)
+    scal!(n, convert(ComplexF32, alpha), wide_x)
+    thin_x = convert(typeof(x), wide_x)
+    copyto!(x, thin_x)
+    return x
 end
 
 # level 2

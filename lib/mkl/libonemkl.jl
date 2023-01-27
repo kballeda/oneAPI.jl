@@ -383,6 +383,11 @@ function onemklHaxpy(device_queue, n, alpha, x, incx, y, incy)
                         x::ZePtr{Float16}, incx::Int64, y::ZePtr{Float16}, incy::Int64)::Cvoid
 end
 
+function onemklHscal(device_queue, n, alpha, x, incx)
+	@ccall liboneapi_support.onemklHscal(device_queue::syclQueue_t, n::Int64, 
+                                        alpha::Float16, x::ZePtr{Float16}, incx::Int64)::Cvoid
+end
+
 function onemklDscal(device_queue, n, alpha, x, incx)
 	@ccall liboneapi_support.onemklDscal(device_queue::syclQueue_t, n::Int64, 
                                         alpha::Cdouble, x::ZePtr{Cdouble}, incx::Int64)::Cvoid

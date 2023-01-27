@@ -609,6 +609,14 @@ extern "C" void onemklHaxpy(syclQueue_t device_queue, int64_t n, uint16_t alpha,
 }
 
 // Support Level-1: SCAL primitive
+
+extern "C" void onemklHscal(syclQueue_t device_queue, int64_t n, uint16_t alpha,
+                            short *x, int64_t incx) {
+    auto status = oneapi::mkl::blas::column_major::scal(device_queue->val, n, sycl::bit_cast<sycl::half>(alpha),
+                                                        reinterpret_cast<sycl::half *>(x), incx);
+    __FORCE_MKL_FLUSH__(status);
+}
+
 extern "C" void onemklDscal(syclQueue_t device_queue, int64_t n, double alpha,
                             double *x, int64_t incx) {
     auto status = oneapi::mkl::blas::column_major::scal(device_queue->val, n, alpha,

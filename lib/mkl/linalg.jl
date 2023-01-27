@@ -56,7 +56,7 @@ function LinearAlgebra.axpy!(alpha::Number, x::oneStridedVecOrMat{T}, y::oneStri
     oneMKL.axpy!(length(x), alpha, x, y)
 end
 
-LinearAlgebra.rmul!(x::oneStridedVecOrMat{<:onemklFloat}, k::Number) = 
+LinearAlgebra.rmul!(x::oneStridedVecOrMat{<:Union{Float16, ComplexF16, onemklFloat}}, k::Number) = 
 	oneMKL.scal!(length(x), convert(eltype(x),k), x)
 
 # Work around ambiguity with GPUArrays wrapper

@@ -91,7 +91,8 @@ k = 13
         @test testf(dot, rand(T, m), rand(T, m))
         @test testf(*, transpose(rand(T, m)), rand(T,m))
         @test testf(*, rand(T, m)', rand(T,m))
-
+        @test testf(rmul!, rand(T,m), alpha[1])
+        
         if T <: ComplexF16
             @test testf(dot, rand(T, m), rand(T, m))
             x = rand(T, m)
