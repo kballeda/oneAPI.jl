@@ -1,6 +1,6 @@
 #include "onemkl.h"
 #include "sycl.hpp"
-
+#include <iostream>
 #include <oneapi/mkl.hpp>
 
 // This is a workaround to flush MKL submissions into Level-zero queue, using
@@ -117,6 +117,49 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
         reinterpret_cast<std::complex<double> *>(C), ldc);
     __FORCE_MKL_FLUSH__(status);
     return 0;
+}
+
+extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose transa,
+                                  onemklTranspose transb, int64_t m,
+                                  int64_t n, int64_t k, float alpha,
+                                  const float **a, int64_t lda, const float **b,
+                                  int64_t ldb, float beta, float **c,
+                                  int64_t ldc, int64_t group_count) {
+    std::cout << "Group Count " << group_count << std::endl;
+    std::vector<oneapi::mkl::transpose> transa_vec(group_count);
+    std::vector<oneapi::mkl::transpose> transb_vec(group_count);
+    std::vector<int64_t> m_vec(group_count);
+    std::vector<int64_t> n_vec(group_count);
+    std::vector<int64_t> k_vec(group_count);
+    std::vector<float> alpha_vec(group_count);
+    std::vector<float> beta_vec(group_count);
+    std::vector<int64_t> lda_vec(group_count);
+    std::vector<int64_t> ldb_vec(group_count);
+    std::vector<int64_t> ldc_vec(group_count);
+    std::vector<int64_t> group_size(group_count);
+    auto t_a = convert(transa);
+    auto t_b = convert(transb);
+    for (int i = 0; i < group_count; i++) {
+        transa_vec[i] = t_a;
+        transb_vec[i] = t_b;
+        m_vec[i] = m;
+        n_vec[i] = n;
+        k_vec[i] = k;
+        alpha_vec[i] = alpha;
+        beta_vec[i] = beta;
+        lda_vec[i] = lda;
+        ldb_vec[i] = ldb;
+        ldc_vec[i] = ldc;
+        group_size[i] = m * n * k;
+    }
+    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, &transa_vec[0],
+                                        &transb_vec[0], &m_vec[0], &n_vec[0], &k_vec[0],
+                                        &alpha_vec[0], (const float **)&a[0],
+                                        &lda_vec[0], (const float **)&b[0],
+                                        &ldb_vec[0], &beta_vec[0],
+                                        &c[0], &ldc_vec[0], group_count, &group_size[0]);
+    __FORCE_MKL_FLUSH__(status);
+    std::cout << "Done with gemm_batch" << std::endl;
 }
 
 extern "C" void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
