@@ -815,7 +815,7 @@ end
 @testset for T in [Float32]
     alpha = rand(T)  
     beta = rand(T)
-    group_count = 1
+    group_count = 10
     # generate matrices
     bA = [rand(T,m,k) for i in 1:group_count]
     bB = [rand(T,k,n) for i in 1:group_count]

@@ -125,33 +125,33 @@ extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose tra
                                   const float **a, int64_t lda, const float **b,
                                   int64_t ldb, float beta, float **c,
                                   int64_t ldc, int64_t group_count) {
-    std::cout << "Group Count " << group_count << std::endl;
-    std::vector<oneapi::mkl::transpose> transa_vec(group_count);
-    std::vector<oneapi::mkl::transpose> transb_vec(group_count);
-    std::vector<int64_t> m_vec(group_count);
-    std::vector<int64_t> n_vec(group_count);
-    std::vector<int64_t> k_vec(group_count);
-    std::vector<float> alpha_vec(group_count);
-    std::vector<float> beta_vec(group_count);
-    std::vector<int64_t> lda_vec(group_count);
-    std::vector<int64_t> ldb_vec(group_count);
-    std::vector<int64_t> ldc_vec(group_count);
-    std::vector<int64_t> group_size(group_count);
+    auto main_queue = device_queue->val;
+    auto device = main_queue.get_device();
+    auto context = main_queue.get_context();
+
+    auto m_dev = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
+    auto n_dev = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
+    auto k_dev = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
+    auto lda_dev = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
+    auto ldb_dev = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
+    auto ldc_dev = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
+    auto alpha_dev = (float *) malloc_shared(group_count * sizeof(float), device, context);
+    auto beta_dev = (float *) malloc_shared(group_count * sizeof(float), device, context);
+    auto transa_dev = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose), device, context);
     auto t_a = convert(transa);
     auto t_b = convert(transb);
     for (int i = 0; i < group_count; i++) {
-        transa_vec[i] = t_a;
-        transb_vec[i] = t_b;
-        m_vec[i] = m;
-        n_vec[i] = n;
-        k_vec[i] = k;
-        alpha_vec[i] = alpha;
-        beta_vec[i] = beta;
-        lda_vec[i] = lda;
-        ldb_vec[i] = ldb;
-        ldc_vec[i] = ldc;
-        group_size[i] = m * n * k;
+        m_dev[i] = m;
+        n_dev[i] = n;
+        k_dev[i] = k;
+        lda_dev[i] = lda;
+        ldb_dev[i] = ldb;
+        ldc_dev[i] = ldc;
+        alpha_dev[i] = alpha;
+        beta_dev[i] = beta;
+        transa_dev[i] = t_a;
     }
+#if 0
     auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, &transa_vec[0],
                                         &transb_vec[0], &m_vec[0], &n_vec[0], &k_vec[0],
                                         &alpha_vec[0], (const float **)&a[0],
@@ -159,6 +159,7 @@ extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose tra
                                         &ldb_vec[0], &beta_vec[0],
                                         &c[0], &ldc_vec[0], group_count, &group_size[0]);
     __FORCE_MKL_FLUSH__(status);
+#endif
     std::cout << "Done with gemm_batch" << std::endl;
 }
 
