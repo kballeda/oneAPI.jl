@@ -138,8 +138,10 @@ extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose tra
     auto alpha_dev = (float *) malloc_shared(group_count * sizeof(float), device, context);
     auto beta_dev = (float *) malloc_shared(group_count * sizeof(float), device, context);
     auto transa_dev = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose), device, context);
+    auto transb_dev = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose), device, context);
     auto t_a = convert(transa);
     auto t_b = convert(transb);
+    auto group_size = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
     for (int i = 0; i < group_count; i++) {
         m_dev[i] = m;
         n_dev[i] = n;
@@ -150,16 +152,18 @@ extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose tra
         alpha_dev[i] = alpha;
         beta_dev[i] = beta;
         transa_dev[i] = t_a;
+        transb_dev[i] = t_b;
+        group_size[i] = group_count;
     }
-#if 0
-    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, &transa_vec[0],
-                                        &transb_vec[0], &m_vec[0], &n_vec[0], &k_vec[0],
-                                        &alpha_vec[0], (const float **)&a[0],
-                                        &lda_vec[0], (const float **)&b[0],
-                                        &ldb_vec[0], &beta_vec[0],
-                                        &c[0], &ldc_vec[0], group_count, &group_size[0]);
+
+    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, &transa_dev[0],
+                                        &transb_dev[0], &m_dev[0], &n_dev[0], &k_dev[0],
+                                        &alpha_dev[0], (const float **)&a[0],
+                                        &lda_dev[0], (const float **)&b[0],
+                                        &ldb_dev[0], &beta_dev[0],
+                                        &c[0], &ldc_dev[0], group_count, &group_size[0]);
     __FORCE_MKL_FLUSH__(status);
-#endif
+
     std::cout << "Done with gemm_batch" << std::endl;
 }
 

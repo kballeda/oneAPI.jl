@@ -3,9 +3,9 @@ using oneAPI.oneMKL: band, bandex
 
 using LinearAlgebra
 
-m = 2
-n = 2
-k = 2
+m = 20
+n = 35
+k = 13
 
 #=
 ############################################################################################
@@ -815,7 +815,7 @@ end
 @testset for T in [Float32]
     alpha = rand(T)  
     beta = rand(T)
-    group_count = 10
+    group_count = 1
     # generate matrices
     bA = [rand(T,m,k) for i in 1:group_count]
     bB = [rand(T,k,n) for i in 1:group_count]
