@@ -1,6 +1,7 @@
 #include "onemkl.h"
 #include "sycl.hpp"
 #include <iostream>
+#include <cstdio>
 #include <oneapi/mkl.hpp>
 
 // This is a workaround to flush MKL submissions into Level-zero queue, using
@@ -153,9 +154,9 @@ extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose tra
         beta_dev[i] = beta;
         transa_dev[i] = t_a;
         transb_dev[i] = t_b;
-        group_size[i] = group_count;
+        group_size[i] = 1;
     }
-
+    
     auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, &transa_dev[0],
                                         &transb_dev[0], &m_dev[0], &n_dev[0], &k_dev[0],
                                         &alpha_dev[0], (const float **)&a[0],
@@ -164,7 +165,6 @@ extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose tra
                                         &c[0], &ldc_dev[0], group_count, &group_size[0]);
     __FORCE_MKL_FLUSH__(status);
 
-    std::cout << "Done with gemm_batch" << std::endl;
 }
 
 extern "C" void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
