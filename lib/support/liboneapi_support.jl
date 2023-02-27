@@ -167,6 +167,18 @@ function onemklCgemmBatched(device_queue, transa, transb, m, n, k, alpha, a, lda
                                                 ldc::Int64, group_count::Int64)::Cvoid
 end
 
+function onemklZgemmBatched(device_queue, transa, transb, m, n, k, alpha, a, lda, b, ldb,
+                            beta, c, ldc, group_count)
+    @ccall liboneapi_support.onemklZgemmBatched(device_queue::syclQueue_t,
+                                                transa::onemklTranspose,
+                                                transb::onemklTranspose, m::Int64, n::Int64,
+                                                k::Int64, alpha::ComplexF64,
+                                                a::ZePtr{Ptr{ComplexF64}}, lda::Int64,
+                                                b::ZePtr{Ptr{ComplexF64}}, ldb::Int64,
+                                                beta::ComplexF64, c::ZePtr{Ptr{ComplexF64}},
+                                                ldc::Int64, group_count::Int64)::Cvoid
+end
+
 function onemklSsymm(device_queue, left_right, upper_lower, m, n, alpha, a, lda, b, ldb,
                      beta, c, ldc)
     @ccall liboneapi_support.onemklSsymm(device_queue::syclQueue_t, left_right::onemklSide,

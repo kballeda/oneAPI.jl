@@ -86,8 +86,8 @@ class gemmBatchInfo {
             m_ldabuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
             m_ldbbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
             m_ldcbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-            m_alphabuf = (T *) malloc_shared(group_count * sizeof(float), m_device, m_context);
-            m_betabuf = (T *) malloc_shared(group_count * sizeof(float), m_device, m_context);
+            m_alphabuf = (T *) malloc_shared(group_count * sizeof(T), m_device, m_context);
+            m_betabuf = (T *) malloc_shared(group_count * sizeof(T), m_device, m_context);
             m_transa = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
                                                                 m_device, m_context);
             m_transb = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
@@ -263,6 +263,32 @@ extern "C" void onemklCgemmBatched(syclQueue_t device_queue, onemklTranspose tra
 
     __FORCE_MKL_FLUSH__(status);
 
+}
+
+extern "C" void onemklZgemmBatched(syclQueue_t device_queue, onemklTranspose transa,
+                                  onemklTranspose transb, int64_t m,
+                                  int64_t n, int64_t k, double _Complex alpha,
+                                  const double _Complex **a, int64_t lda,
+                                  const double _Complex **b,
+                                  int64_t ldb, double _Complex beta,
+                                  double _Complex **c,
+                                  int64_t ldc, int64_t group_count) {
+    gemmBatchInfo<std::complex<double>> gemmInfo(device_queue, group_count, transa, transb,
+                          m, n, k, lda, ldb, ldc, alpha, beta);
+
+    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val,
+                        &gemmInfo.m_transa[0], &gemmInfo.m_transb[0],
+                        &gemmInfo.m_mbuf[0], &gemmInfo.m_nbuf[0],
+                        &gemmInfo.m_kbuf[0], &gemmInfo.m_alphabuf[0],
+                        reinterpret_cast<const std::complex<double> **>(&a[0]),
+                        &gemmInfo.m_ldabuf[0],
+                        reinterpret_cast<const std::complex<double> **>(&b[0]),
+                        &gemmInfo.m_ldbbuf[0],
+                        &gemmInfo.m_betabuf[0],
+                        reinterpret_cast<std::complex<double> **>(&c[0]), &gemmInfo.m_ldcbuf[0],
+                        group_count, &gemmInfo.m_group_size[0]);
+
+    __FORCE_MKL_FLUSH__(status);
 }
 
 extern "C" void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,

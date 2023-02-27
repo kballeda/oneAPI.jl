@@ -54,7 +54,8 @@ end
 for (fname, elty) in
         ((:onemklDgemmBatched,:Float64),
          (:onemklSgemmBatched,:Float32),
-         (:onemklCgemmBatched,:ComplexF32))
+         (:onemklCgemmBatched,:ComplexF32),
+         (:onemklZgemmBatched,:ComplexF64))
     @eval begin
         function gemm_batched!(transA::Char,
                                transB::Char,
