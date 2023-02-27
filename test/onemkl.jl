@@ -811,7 +811,7 @@ end
 end
 
 @testset "Batch Primitives" begin
-    @testset for T in [Float32, Float64]
+    @testset for T in [Float32, Float64, ComplexF32]
         alpha = rand(T)  
         beta = rand(T)
         group_count = 20

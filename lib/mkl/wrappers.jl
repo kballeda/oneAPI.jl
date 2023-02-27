@@ -53,7 +53,8 @@ end
 ## (GE) general matrix-matrix multiplication batched
 for (fname, elty) in
         ((:onemklDgemmBatched,:Float64),
-         (:onemklSgemmBatched,:Float32))
+         (:onemklSgemmBatched,:Float32),
+         (:onemklCgemmBatched,:ComplexF32))
     @eval begin
         function gemm_batched!(transA::Char,
                                transB::Char,
