@@ -815,7 +815,7 @@ end
 @testset for T in [Float32]
     alpha = rand(T)  
     beta = rand(T)
-    group_count = 10
+    group_count = 20
     # generate matrices
     bA = [rand(T,m,k) for i in 1:group_count]
     bB = [rand(T,k,n) for i in 1:group_count]
@@ -844,5 +844,15 @@ end
             @test bC[i] ≈ h_C
         end
         @test_throws DimensionMismatch oneMKL.gemm_batched!('N','N',alpha,bd_A,bd_bad,beta,bd_C)
+    end
+
+    @testset "gemm_batched" begin
+        bd_C = oneMKL.gemm_batched('N','N',bd_A,bd_B)
+        for i in 1:length(bA)
+            bC = bA[i]*bB[i]
+            h_C = Array(bd_C[i])
+            @test bC ≈ h_C
+        end
+        @test_throws DimensionMismatch oneMKL.gemm_batched('N','N',alpha,bd_A,bd_bad)
     end
 end

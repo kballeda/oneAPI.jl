@@ -94,6 +94,16 @@ for (fname, elty) in
     end
 end
 
+function gemm_batched(transA::Char, transB::Char, alpha::Number,
+                      A::Vector{<:oneStridedMatrix{T}}, B::Vector{<:oneStridedMatrix{T}}) where T
+    C = oneMatrix{T}[similar(B[1], (size(A[1], transA == 'N' ? 1 : 2),size(B[1], transB == 'N' ? 2 : 1))) for i in 1:length(A)]
+    gemm_batched!(transA, transB, alpha, A, B, zero(T), C )
+end
+function gemm_batched(transA::Char, transB::Char,
+                      A::Vector{<:oneStridedMatrix{T}}, B::Vector{<:oneStridedMatrix{T}}) where T
+    gemm_batched(transA, transB, one(T), A, B)
+end
+
 ## (L3: symm) symmetric matrix-matrix and matrix-vector multiplication
 for (fname, elty) in ((:onemklSsymm, :Float32),
                       (:onemklDsymm, :Float64),
