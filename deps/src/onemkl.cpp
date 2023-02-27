@@ -55,30 +55,46 @@ oneapi::mkl::side convert(onemklSide val) {
 template <typename T>
 class gemmBatchInfo {
     public:
-        void memInit(syclQueue_t device_queue,
-                        int64_t group_count,
-                        onemklTranspose transa,
-                        onemklTranspose transb,
-                        int64_t m, int64_t n, int64_t k,
-                        int64_t lda, int64_t ldb, int64_t ldc,
-                        T alpha, T beta
-                        ) {
+        int64_t *m_mbuf = nullptr;
+        int64_t *m_nbuf = nullptr;
+        int64_t *m_kbuf = nullptr;
+        int64_t *m_ldabuf = nullptr;
+        int64_t *m_ldbbuf = nullptr;
+        int64_t *m_ldcbuf = nullptr;
+        oneapi::mkl::transpose *m_transa = nullptr;
+        oneapi::mkl::transpose *m_transb = nullptr;
+        T *m_alphabuf = nullptr;
+        T *m_betabuf = nullptr;
+        int64_t *m_group_size = nullptr;
+        sycl::device m_device;
+        sycl::context m_context;
+
+        // Constructor
+        gemmBatchInfo(syclQueue_t device_queue,
+                    int64_t group_count,
+                    onemklTranspose transa,
+                    onemklTranspose transb,
+                    int64_t m, int64_t n, int64_t k,
+                    int64_t lda, int64_t ldb, int64_t ldc,
+                    T alpha, T beta) {
             auto main_queue = device_queue->val;
-            auto device = main_queue.get_device();
-            auto context = main_queue.get_context();
-            m_mbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
-            m_nbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
-            m_kbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
-            m_ldabuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
-            m_ldbbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
-            m_ldcbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
-            m_alphabuf = (T *) malloc_shared(group_count * sizeof(float), device, context);
-            m_betabuf = (T *) malloc_shared(group_count * sizeof(float), device, context);
-            m_transa = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose), device, context);
-            m_transb = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose), device, context);
+            m_device = main_queue.get_device();
+            m_context = main_queue.get_context();
+            m_mbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            m_nbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            m_kbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            m_ldabuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            m_ldbbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            m_ldcbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            m_alphabuf = (T *) malloc_shared(group_count * sizeof(float), m_device, m_context);
+            m_betabuf = (T *) malloc_shared(group_count * sizeof(float), m_device, m_context);
+            m_transa = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
+                                                                m_device, m_context);
+            m_transb = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
+                                                                m_device, m_context);
             auto t_a = convert(transa);
             auto t_b = convert(transb);
-            m_group_size = (int64_t *) malloc_shared(group_count * sizeof(int64_t), device, context);
+            m_group_size = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
 
             for (int i = 0; i < group_count; i++) {
                 m_mbuf[i] = m;
@@ -95,17 +111,20 @@ class gemmBatchInfo {
             }
         };
 
-        int64_t *m_mbuf = nullptr;
-        int64_t *m_nbuf = nullptr;
-        int64_t *m_kbuf = nullptr;
-        int64_t *m_ldabuf = nullptr;
-        int64_t *m_ldbbuf = nullptr;
-        int64_t *m_ldcbuf = nullptr;
-        oneapi::mkl::transpose *m_transa = nullptr;
-        oneapi::mkl::transpose *m_transb = nullptr;
-        T *m_alphabuf = nullptr;
-        T *m_betabuf = nullptr;
-        int64_t *m_group_size = nullptr;
+        // Destructor
+        ~gemmBatchInfo() {
+            free(m_mbuf, m_context);
+            free(m_nbuf, m_context);
+            free(m_kbuf, m_context);
+            free(m_ldabuf, m_context);
+            free(m_ldbbuf, m_context);
+            free(m_ldcbuf, m_context);
+            free(m_alphabuf, m_context);
+            free(m_betabuf, m_context);
+            free(m_transa, m_context);
+            free(m_transb, m_context);
+            free(m_group_size, m_context);
+        }
 };
 
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
@@ -182,8 +201,7 @@ extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose tra
                                   const float **a, int64_t lda, const float **b,
                                   int64_t ldb, float beta, float **c,
                                   int64_t ldc, int64_t group_count) {
-    gemmBatchInfo<float> gemmInfo;
-    gemmInfo.memInit(device_queue, group_count, transa, transb,
+    gemmBatchInfo<float> gemmInfo(device_queue, group_count, transa, transb,
                           m, n, k, lda, ldb, ldc, alpha, beta);
 
     auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val,
