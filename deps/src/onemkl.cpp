@@ -1,7 +1,8 @@
 #include "onemkl.h"
 #include "sycl.hpp"
 #include <iostream>
-#include <cstdio>
+#include <exception>
+#include <memory>
 #include <oneapi/mkl.hpp>
 
 // This is a workaround to flush MKL submissions into Level-zero queue, using
@@ -68,6 +69,8 @@ class gemmBatchInfo {
         int64_t *m_group_size = nullptr;
         sycl::device m_device;
         sycl::context m_context;
+        oneapi::mkl::transpose m_ta;
+        oneapi::mkl::transpose m_tb;
 
         // Constructor
         gemmBatchInfo(syclQueue_t device_queue,
@@ -77,25 +80,32 @@ class gemmBatchInfo {
                     int64_t m, int64_t n, int64_t k,
                     int64_t lda, int64_t ldb, int64_t ldc,
                     T alpha, T beta) {
+            // Get device and context info from device_queue
             auto main_queue = device_queue->val;
             m_device = main_queue.get_device();
             m_context = main_queue.get_context();
-            m_mbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-            m_nbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-            m_kbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-            m_ldabuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-            m_ldbbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-            m_ldcbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-            m_alphabuf = (T *) malloc_shared(group_count * sizeof(T), m_device, m_context);
-            m_betabuf = (T *) malloc_shared(group_count * sizeof(T), m_device, m_context);
-            m_transa = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
-                                                                m_device, m_context);
-            m_transb = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
-                                                                m_device, m_context);
-            auto t_a = convert(transa);
-            auto t_b = convert(transb);
-            m_group_size = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
-
+            try {
+                // Allocate uniform arrays of m,n,k,lda,ldb,ldc,alpha,beta
+                // group_size and transpose_a, transpose_b supporting oneMKL
+                // gemm_batch API
+                m_mbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_nbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_kbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_ldabuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_ldbbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_ldcbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_alphabuf = (T *) malloc_shared(group_count * sizeof(T), m_device, m_context);
+                m_betabuf = (T *) malloc_shared(group_count * sizeof(T), m_device, m_context);
+                m_transa = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
+                                                                    m_device, m_context);
+                m_transb = (oneapi::mkl::transpose *) malloc_shared(group_count * sizeof(oneapi::mkl::transpose),
+                                                                    m_device, m_context);
+                m_ta = convert(transa);
+                m_tb = convert(transb);
+                m_group_size = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            } catch(const std::bad_alloc& e) {
+                std::cerr << "Error: " << e.what() << std::endl;
+            }
             for (int i = 0; i < group_count; i++) {
                 m_mbuf[i] = m;
                 m_nbuf[i] = n;
@@ -105,8 +115,8 @@ class gemmBatchInfo {
                 m_ldcbuf[i] = ldc;
                 m_alphabuf[i] = alpha;
                 m_betabuf[i] = beta;
-                m_transa[i] = t_a;
-                m_transb[i] = t_b;
+                m_transa[i] = m_ta;
+                m_transb[i] = m_tb;
                 m_group_size[i] = 1;
             }
         };
