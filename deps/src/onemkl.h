@@ -59,6 +59,13 @@ int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                 const short *B, int64_t ldb, uint16_t beta, short *C,
                 int64_t ldc);
 
+void onemklHgemmBatched(syclQueue_t device_queue, onemklTranspose transa,
+                        onemklTranspose transb, int64_t m,
+                        int64_t n, int64_t k, uint16_t alpha,
+                        const short **a, int64_t lda, const short **b,
+                        int64_t ldb, uint16_t beta, short **c,
+                        int64_t ldc, int64_t group_count);
+
 void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose transa,
                         onemklTranspose transb, int64_t m,
                         int64_t n, int64_t k, float alpha,

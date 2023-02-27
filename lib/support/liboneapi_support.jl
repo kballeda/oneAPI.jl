@@ -132,12 +132,24 @@ function onemklZgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ld
 end
 
 function onemklHgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
-    ldc)
-@ccall liboneapi_support.onemklHgemm(device_queue::syclQueue_t, transA::onemklTranspose,
-                        transB::onemklTranspose, m::Int64, n::Int64,
-                        k::Int64, alpha::Float16, A::ZePtr{Float16},
-                        lda::Int64, B::ZePtr{Float16}, ldb::Int64,
-                        beta::Float16, C::ZePtr{Float16}, ldc::Int64)::Cint
+                     ldc)
+    @ccall liboneapi_support.onemklHgemm(device_queue::syclQueue_t, transA::onemklTranspose,
+                                         transB::onemklTranspose, m::Int64, n::Int64,
+                                         k::Int64, alpha::Float16, A::ZePtr{Float16},
+                                         lda::Int64, B::ZePtr{Float16}, ldb::Int64,
+                                         beta::Float16, C::ZePtr{Float16}, ldc::Int64)::Cint
+end
+
+function onemklHgemmBatched(device_queue, transa, transb, m, n, k, alpha, a, lda, b, ldb,
+                            beta, c, ldc, group_count)
+    @ccall liboneapi_support.onemklHgemmBatched(device_queue::syclQueue_t,
+                                                transa::onemklTranspose,
+                                                transb::onemklTranspose, m::Int64, n::Int64,
+                                                k::Int64, alpha::Float16,
+                                                a::ZePtr{Ptr{Float16}}, lda::Int64,
+                                                b::ZePtr{Ptr{Float16}}, ldb::Int64,
+                                                beta::Float16, c::ZePtr{Ptr{Float16}},
+                                                ldc::Int64, group_count::Int64)::Cvoid
 end
 
 function onemklSgemmBatched(device_queue, transa, transb, m, n, k, alpha, a, lda, b, ldb,

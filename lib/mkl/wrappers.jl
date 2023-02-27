@@ -54,6 +54,7 @@ end
 for (fname, elty) in
         ((:onemklDgemmBatched,:Float64),
          (:onemklSgemmBatched,:Float32),
+         (:onemklHgemmBatched,:Float16),
          (:onemklCgemmBatched,:ComplexF32),
          (:onemklZgemmBatched,:ComplexF64))
     @eval begin

@@ -208,6 +208,28 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
     return 0;
 }
 
+extern "C" void onemklHgemmBatched(syclQueue_t device_queue, onemklTranspose transa,
+                                  onemklTranspose transb, int64_t m,
+                                  int64_t n, int64_t k, uint16_t alpha,
+                                  const short **a, int64_t lda, const short **b,
+                                  int64_t ldb, uint16_t beta, short **c,
+                                  int64_t ldc, int64_t group_count) {
+    gemmBatchInfo<sycl::half> gemmInfo(device_queue, group_count, transa, transb,
+                          m, n, k, lda, ldb, ldc, sycl::bit_cast<sycl::half>(alpha),
+                          sycl::bit_cast<sycl::half>(beta));
+    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val,
+                        &gemmInfo.m_transa[0], &gemmInfo.m_transb[0],
+                        &gemmInfo.m_mbuf[0], &gemmInfo.m_nbuf[0],
+                        &gemmInfo.m_kbuf[0], &gemmInfo.m_alphabuf[0],
+                        reinterpret_cast<const sycl::half **>(&a[0]), &gemmInfo.m_ldabuf[0],
+                        reinterpret_cast<const sycl::half **>(&b[0]), &gemmInfo.m_ldbbuf[0],
+                        &gemmInfo.m_betabuf[0], reinterpret_cast<sycl::half **>(&c[0]),
+                        &gemmInfo.m_ldcbuf[0], group_count, &gemmInfo.m_group_size[0]);
+
+    __FORCE_MKL_FLUSH__(status);
+
+}
+
 extern "C" void onemklSgemmBatched(syclQueue_t device_queue, onemklTranspose transa,
                                   onemklTranspose transb, int64_t m,
                                   int64_t n, int64_t k, float alpha,
