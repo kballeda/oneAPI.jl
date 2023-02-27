@@ -86,9 +86,9 @@ for (fname, elty) in
             queue = global_queue(context(A[1]), device(A[1]))
             $fname(sycl_queue(queue), transA, transB, m, n, k, alpha, Aptrs, lda, Bptrs,
                    ldb, beta, Cptrs, ldc, length(A))
-            #unsafe_free!(Cptrs)
-            #unsafe_free!(Bptrs)
-            #unsafe_free!(Aptrs)
+            unsafe_free!(Cptrs)
+            unsafe_free!(Bptrs)
+            unsafe_free!(Aptrs)
             C
         end
     end
