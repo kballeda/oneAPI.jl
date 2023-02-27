@@ -137,9 +137,21 @@ function onemklSgemmBatched(device_queue, transa, transb, m, n, k, alpha, a, lda
                                                 transa::onemklTranspose,
                                                 transb::onemklTranspose, m::Int64, n::Int64,
                                                 k::Int64, alpha::Cfloat,
-                                                a::ZePtr{ZePtr{Cfloat}}, lda::Int64,
-                                                b::ZePtr{ZePtr{Cfloat}}, ldb::Int64,
-                                                beta::Cfloat, c::ZePtr{ZePtr{Cfloat}},
+                                                a::ZePtr{Ptr{Cfloat}}, lda::Int64,
+                                                b::ZePtr{Ptr{Cfloat}}, ldb::Int64,
+                                                beta::Cfloat, c::ZePtr{Ptr{Cfloat}},
+                                                ldc::Int64, group_count::Int64)::Cvoid
+end
+
+function onemklDgemmBatched(device_queue, transa, transb, m, n, k, alpha, a, lda, b, ldb,
+                            beta, c, ldc, group_count)
+    @ccall liboneapi_support.onemklDgemmBatched(device_queue::syclQueue_t,
+                                                transa::onemklTranspose,
+                                                transb::onemklTranspose, m::Int64, n::Int64,
+                                                k::Int64, alpha::Cdouble,
+                                                a::Ptr{Ptr{Cdouble}}, lda::Int64,
+                                                b::Ptr{Ptr{Cdouble}}, ldb::Int64,
+                                                beta::Cdouble, c::Ptr{Ptr{Cdouble}},
                                                 ldc::Int64, group_count::Int64)::Cvoid
 end
 
