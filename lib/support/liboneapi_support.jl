@@ -149,9 +149,9 @@ function onemklDgemmBatched(device_queue, transa, transb, m, n, k, alpha, a, lda
                                                 transa::onemklTranspose,
                                                 transb::onemklTranspose, m::Int64, n::Int64,
                                                 k::Int64, alpha::Cdouble,
-                                                a::Ptr{Ptr{Cdouble}}, lda::Int64,
-                                                b::Ptr{Ptr{Cdouble}}, ldb::Int64,
-                                                beta::Cdouble, c::Ptr{Ptr{Cdouble}},
+                                                a::ZePtr{Ptr{Cdouble}}, lda::Int64,
+                                                b::ZePtr{Ptr{Cdouble}}, ldb::Int64,
+                                                beta::Cdouble, c::ZePtr{Ptr{Cdouble}},
                                                 ldc::Int64, group_count::Int64)::Cvoid
 end
 
