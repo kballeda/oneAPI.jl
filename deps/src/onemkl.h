@@ -438,6 +438,9 @@ void onemklCswap(syclQueue_t device_queue, int64_t n, float _Complex *x, int64_t
 void onemklZswap(syclQueue_t device_queue, int64_t n, double _Complex *x, int64_t incx,
                 double _Complex *y, int64_t incy);
 
+void onemklSgetrfBatched(syclQueue_t device_queue, int64_t m, int64_t n, float **a,
+                        int64_t lda, int64_t **ipiv, int64_t group_count);
+
 void onemklDestroy(void);
 #ifdef __cplusplus
 }

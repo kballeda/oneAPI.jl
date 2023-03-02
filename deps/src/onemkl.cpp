@@ -1,6 +1,7 @@
 #include "onemkl.h"
 #include "sycl.hpp"
-
+#include <iostream>
+#include <exception>
 #include <oneapi/mkl.hpp>
 
 // This is a workaround to flush MKL submissions into Level-zero queue, using
@@ -49,6 +50,75 @@ oneapi::mkl::side convert(onemklSide val) {
     case ONEMKL_SIDE_RIGHT:
         return oneapi::mkl::side::right;
     }
+}
+
+template <typename T>
+class getrfBatchInfo {
+    public:
+        int64_t *m_mbuf = nullptr;
+        int64_t *m_nbuf = nullptr;
+        int64_t *m_ldabuf = nullptr;
+        T *m_scartchbuf = nullptr;
+        int64_t *m_group_size = nullptr;
+        sycl::device m_device;
+        sycl::context m_context;
+
+        // Constructor
+        getrfBatchInfo (syclQueue_t device_queue,
+                        int64_t m,
+                        int64_t n,
+                        int64_t lda,
+                        int64_t group_count) {
+            auto main_queue = device_queue->val;
+            m_device = main_queue.get_device();
+            m_context = main_queue.get_context();
+
+            // Get scratch pad sizes
+            auto getrf_batch_scratchpad_size = oneapi::mkl::lapack::getrf_batch_scratchpad_size<T>(main_queue,
+                                                m, n, lda, group_count, m_group_size);
+
+            try {
+                // Allocate uniform arrays m,n,lda,scratchbuf
+                m_mbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_nbuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_ldabuf = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+                m_group_size = (int64_t *) malloc_shared(group_count * sizeof(int64_t), m_device, m_context);
+            } catch(const std::bad_alloc& e) {
+                std::cerr << "Error: " << e.what() << std::endl;
+            }
+
+            // Initialize data
+            for (int i = 0; i < group_count; i++) {
+                m_mbuf[i] = m;
+                m_nbuf[i] = n;
+                m_ldabuf[i] = lda;
+                m_group_size[i] = 1;
+            }
+
+            // Get scratchpad size
+            auto scratchpad_size = oneapi::mkl::lapack::getrf_batch_scratchpad_size(main_queue,
+                                    m, n, lda, group_count, m_group_size);
+            m_scartchbuf = (T*) malloc_shared(scratchpad_size * sizeof(T), m_device, m_context);
+        }
+
+        // Destructor
+        ~getrfBatchInfo() {
+            free(m_mbuf, m_context);
+            free(m_nbuf, m_context);
+            free(m_ldabuf, m_context);
+            free(m_group_size, m_context);
+            free(m_scartchbuf, m_context);
+
+        }
+};
+
+extern "C" void onemklSgetrfBatched(syclQueue_t device_queue, int64_t m, int64_t n, float **a,
+                        int64_t lda, int64_t **ipiv, int64_t group_count) {
+    getrfBatchInfo<float> getrfInfo(device_queue, m, n, lda, group_count);
+    auto status = oneapi::mkl::lapack::getrf_batch(device_queue->val,
+                                &getrfInfo.m_mbuf[0], &getrfInfo.m_nbuf[0],
+                                &a[0], &getrfInfo.m_ldabuf[0], &ipiv[0], group_count,
+                                &getrfInfo.m_group_size[0], &getrfInfo.m_scartchbuf[0]);
 }
 
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
