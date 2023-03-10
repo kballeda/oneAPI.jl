@@ -1,6 +1,6 @@
 #include "onemkl.h"
 #include "sycl.hpp"
-
+#include <iostream>
 #include <oneapi/mkl.hpp>
 
 // This is a workaround to flush MKL submissions into Level-zero queue, using
@@ -49,6 +49,50 @@ oneapi::mkl::side convert(onemklSide val) {
     case ONEMKL_SIDE_RIGHT:
         return oneapi::mkl::side::right;
     }
+}
+
+extern "C" void onemklSgetrf(syclQueue_t device_queue, int64_t m, int64_t n,
+                            float *a, int64_t lda) {
+    auto main_queue = device_queue->val;
+    auto device = main_queue.get_device();
+    auto context = main_queue.get_context();
+    int64_t scratchpad_size = oneapi::mkl::lapack::getrf_scratchpad_size<float>(device_queue->val,
+                            m, n, lda);
+
+    float *scratchpad_dev = (float *) malloc_shared(scratchpad_size * sizeof(float),
+                                                device, context);
+    int64_t *ipiv = (int64_t *) malloc_shared((m*n) * sizeof(int64_t), device, context);
+    
+    auto status = oneapi::mkl::lapack::getrf(device_queue->val, m, n, a, lda, ipiv,
+                                            scratchpad_dev, scratchpad_size);
+    __FORCE_MKL_FLUSH__(status);
+
+    free(scratchpad_dev, context);
+    free(ipiv, context);
+    std::cout << "Done with Sgetrf" << std::endl;
+}
+
+extern "C" void onemklDgetrf(syclQueue_t device_queue, int64_t m, int64_t n,
+                            double *a, int64_t lda) {
+    #if 0
+    auto main_queue = device_queue->val;
+    auto device = main_queue.get_device();
+    auto context = main_queue.get_context();
+    int64_t scratchpad_size = oneapi::mkl::lapack::getrf_scratchpad_size<float>(device_queue->val,
+                            m, n, lda);
+
+    float *scratchpad_dev = (float *) malloc_shared(scratchpad_size * sizeof(float),
+                                                device, context);
+    int64_t *ipiv = (int64_t *) malloc_shared((m*n) * sizeof(int64_t), device, context);
+    
+    auto status = oneapi::mkl::lapack::getrf(device_queue->val, m, n, a, lda, ipiv,
+                                            scratchpad_dev, scratchpad_size);
+    __FORCE_MKL_FLUSH__(status);
+
+    free(scratchpad_dev, context);
+    free(ipiv, context);
+    #endif
+    std::cout << "We will provide support for Dgetrf" << std::endl;
 }
 
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,

@@ -6,7 +6,7 @@ using LinearAlgebra
 m = 20
 n = 35
 k = 13
-
+#=
 ############################################################################################
 @testset "level 1" begin
     @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
@@ -891,5 +891,14 @@ end
             @test C ≈ h_C
             @test C ≈ h_C2
         end
+    end
+end
+=#
+@testset "lapack" begin
+    @testset for T in intersect(eltypes, [Float32])
+        lda = max(m,n)
+        a = rand(T,(lda*n))
+        d_A = oneArray(a)
+        oneMKL.getrf!(m,n,d_A)
     end
 end

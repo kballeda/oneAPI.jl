@@ -59,6 +59,11 @@ int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                 const short *B, int64_t ldb, uint16_t beta, short *C,
                 int64_t ldc);
 
+void onemklSgetrf(syclQueue_t device_queue, int64_t m, int64_t n, float *a,
+                int64_t lda);
+void onemklDgetrf(syclQueue_t device_queue, int64_t m, int64_t n, double *a,
+                int64_t lda);
+
 void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
                 onemklUplo upper_lower, int64_t m, int64_t n,
                 float alpha, const float *a, int64_t lda, const float *b,

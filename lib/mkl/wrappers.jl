@@ -44,6 +44,21 @@ function Base.convert(::Type{onemklDiag}, diag::Char)
     end
 end
 
+for (fname, elty) in
+        ((:onemklSgetrf, :Float32),
+         (:onemklDgetrf, :Float64))
+    @eval begin
+        function getrf!(m::Number,
+                        n::Number,
+                        a::oneStridedVecOrMat{$elty})
+            lda = max(1, stride(a,2))
+            queue = global_queue(context(a), device(a))
+            $fname(sycl_queue(queue), m, n, a, lda)
+            a
+        end
+    end
+end
+
 ## (L3: symm) symmetric matrix-matrix and matrix-vector multiplication
 for (fname, elty) in ((:onemklSsymm, :Float32),
                       (:onemklDsymm, :Float64),
