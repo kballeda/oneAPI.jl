@@ -122,6 +122,20 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
     return 0;
 }
 
+extern "C" void onemklHgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
+                        onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                        uint16_t alpha, const short *a, int64_t lda, int64_t stridea,
+                        const short *b, int64_t ldb, int64_t strideb, uint16_t beta,
+                        short *c, int64_t ldc, int64_t stridec, int64_t batch_size) {
+    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, convert(transa),
+                                                    convert(transb), m, n, k, sycl::bit_cast<sycl::half>(alpha),
+                                                    reinterpret_cast<const sycl::half *>(a), lda, stridea,
+                                                    reinterpret_cast<const sycl::half *>(b), ldb, strideb,
+                                                    sycl::bit_cast<sycl::half>(beta),
+                                                    reinterpret_cast<sycl::half *>(c), ldc, stridec, batch_size);
+    __FORCE_MKL_FLUSH__(status);
+}
+
 extern "C" void onemklSgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
                         onemklTranspose transb, int64_t m, int64_t n, int64_t k,
                         float alpha, const float *a, int64_t lda, int64_t stridea,

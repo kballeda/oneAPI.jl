@@ -59,10 +59,15 @@ int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                 const short *B, int64_t ldb, uint16_t beta, short *C,
                 int64_t ldc);
 
+void onemklHgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
+                    onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                    uint16_t alpha, const short *a, int64_t lda, int64_t stridea,
+                    const short *b, int64_t ldb, int64_t strideb, uint16_t beta,
+                    short *c, int64_t ldc, int64_t stridec, int64_t batch_size);
 void onemklSgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
                     onemklTranspose transb, int64_t m, int64_t n, int64_t k,
                     float alpha, const float *a, int64_t lda, int64_t stridea,
-                    const float *b, int64_t ldb, int64_t stdieb, float beta,
+                    const float *b, int64_t ldb, int64_t strideb, float beta,
                     float *c, int64_t ldc, int64_t stridec, int64_t batch_size);
 void onemklDgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
                     onemklTranspose transb, int64_t m, int64_t n, int64_t k,
@@ -73,7 +78,7 @@ void onemklCgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
                     onemklTranspose transb, int64_t m, int64_t n, int64_t k,
                     float _Complex alpha, const float _Complex *a, int64_t lda,
                     int64_t stridea, const float _Complex *b, int64_t ldb,
-                    int64_t stdieb, float _Complex beta, float _Complex *c,
+                    int64_t strideb, float _Complex beta, float _Complex *c,
                     int64_t ldc, int64_t stridec, int64_t batch_size);
 void onemklZgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
                     onemklTranspose transb, int64_t m, int64_t n, int64_t k,

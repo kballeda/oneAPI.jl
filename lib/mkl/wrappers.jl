@@ -1068,7 +1068,8 @@ for (fname, elty) in
         ((:onemklSgemmBatchStrided, Float32),
          (:onemklDgemmBatchStrided, Float64),
          (:onemklCgemmBatchStrided, ComplexF32),
-         (:onemklZgemmBatchStrided, ComplexF64))
+         (:onemklZgemmBatchStrided, ComplexF64),
+         (:onemklHgemmBatchStrided, Float16))
     @eval begin
         function gemm_strided_batched!(transA::Char,
                                     transB::Char,

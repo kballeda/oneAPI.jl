@@ -896,7 +896,7 @@ end
 =#
 
 @testset "gemm_batch_strided" begin
-    @testset for elty in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+    @testset for elty in intersect(eltypes, [Float16, Float32, Float64, ComplexF32, ComplexF64])
         nbatch = 10
         alpha = rand(elty)
         beta = rand(elty)
