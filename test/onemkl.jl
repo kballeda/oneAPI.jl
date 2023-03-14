@@ -6,7 +6,7 @@ using LinearAlgebra
 m = 20
 n = 35
 k = 13
-#=
+
 ############################################################################################
 @testset "level 1" begin
     @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
@@ -893,7 +893,6 @@ end
         end
     end
 end
-=#
 
 @testset "gemm_batch_strided" begin
     @testset for elty in intersect(eltypes, [Float16, Float32, Float64, ComplexF32, ComplexF64])
