@@ -6,6 +6,12 @@ output_file_path = "../lib/support/liboneapi_support.jl"
 [codegen]
 use_ccall_macro = true
 
+[api.onemklXgemmBatchStrided.argtypes]
+7 = "T"
+8 = "ZePtr{T}"
+11 = "ZePtr{T}"
+14 = "T"
+15 = "ZePtr{T}"
 
 [api.onemklXgemm.argtypes]
 7 = "T"

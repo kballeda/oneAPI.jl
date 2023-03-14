@@ -122,6 +122,28 @@ extern "C" int onemklZgemm(syclQueue_t device_queue, onemklTranspose transA,
     return 0;
 }
 
+extern "C" void onemklSgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
+                        onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                        float alpha, const float *a, int64_t lda, int64_t stridea,
+                        const float *b, int64_t ldb, int64_t strideb, float beta,
+                        float *c, int64_t ldc, int64_t stridec, int64_t batch_size) {
+    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, convert(transa),
+                                                    convert(transb), m, n, k, alpha, a, lda, stridea,
+                                                    b, ldb, strideb, beta, c, ldc, stridec, batch_size);
+    __FORCE_MKL_FLUSH__(status);
+}
+
+extern "C" void onemklDgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
+                        onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                        double alpha, const double *a, int64_t lda, int64_t stridea,
+                        const double *b, int64_t ldb, int64_t strideb, double beta,
+                        double *c, int64_t ldc, int64_t stridec, int64_t batch_size) {
+    auto status = oneapi::mkl::blas::column_major::gemm_batch(device_queue->val, convert(transa),
+                                                    convert(transb), m, n, k, alpha, a, lda, stridea,
+                                                    b, ldb, strideb, beta, c, ldc, stridec, batch_size);
+    __FORCE_MKL_FLUSH__(status);
+}
+
 extern "C" void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
                             onemklUplo upper_lower, int64_t m, int64_t n,
                             float alpha, const float *a, int64_t lda, const float *b,
