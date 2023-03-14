@@ -1066,7 +1066,9 @@ function gemm(transA::Char,
 end
 for (fname, elty) in 
         ((:onemklSgemmBatchStrided, Float32),
-         (:onemklDgemmBatchStrided, Float64))
+         (:onemklDgemmBatchStrided, Float64),
+         (:onemklCgemmBatchStrided, ComplexF32),
+         (:onemklZgemmBatchStrided, ComplexF64))
     @eval begin
         function gemm_strided_batched!(transA::Char,
                                     transB::Char,

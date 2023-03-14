@@ -69,6 +69,18 @@ void onemklDgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
                     double alpha, const double *a, int64_t lda, int64_t stridea,
                     const double *b, int64_t ldb, int64_t strideb, double beta,
                     double *c, int64_t ldc, int64_t stridec, int64_t batch_size);
+void onemklCgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
+                    onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                    float _Complex alpha, const float _Complex *a, int64_t lda,
+                    int64_t stridea, const float _Complex *b, int64_t ldb,
+                    int64_t stdieb, float _Complex beta, float _Complex *c,
+                    int64_t ldc, int64_t stridec, int64_t batch_size);
+void onemklZgemmBatchStrided(syclQueue_t device_queue, onemklTranspose transa,
+                    onemklTranspose transb, int64_t m, int64_t n, int64_t k,
+                    double _Complex alpha, const double _Complex *a, int64_t lda,
+                    int64_t stridea, const double _Complex *b, int64_t ldb,
+                    int64_t strideb, double _Complex beta, double _Complex *c,
+                    int64_t ldc, int64_t stridec, int64_t batch_size);
 
 void onemklSsymm(syclQueue_t device_queue, onemklSide left_right,
                 onemklUplo upper_lower, int64_t m, int64_t n,
