@@ -2,6 +2,8 @@
 #include "sycl.hpp"
 #include <iostream>
 #include <exception>
+#include <CL/cl.h>
+#include <CL/sycl.hpp>
 #include <memory>
 #include <oneapi/mkl.hpp>
 
@@ -157,6 +159,82 @@ class trsmBatchInfo {
         }
 };
 
+extern "C" void onemklSgetrf(syclQueue_t device_queue, int64_t m, int64_t n,
+                             float *a, int64_t lda) {
+    //auto main_queue = device_queue->val;
+    cl::sycl::queue main_queue(sycl::gpu_selector_v);
+    //auto device = main_queue.get_device();
+    //auto context = main_queue.get_context();
+    auto a_size = n * lda;
+    auto ipiv_size = n;
+    std::vector<float> A(a_size);
+    std::vector<int64_t> ipiv(ipiv_size);
+    std::int64_t info = 0;
+    for (int i = 0; i < n;i++)
+        for (int j = 0; j < n;j++)
+            A[i + j * lda] = float(std::rand()) / float(RAND_MAX) - float(0.5);
+
+    //int64_t scratchpad_size = oneapi::mkl::lapack::getrf_scratchpad_size<float>(main_queue, n, n, lda);
+    int64_t scratchpad_size = 16;
+    sycl::buffer<float> a_buffer{A.data(), a_size};
+    sycl::buffer<int64_t> ipiv_buffer{ipiv.data(), ipiv_size};
+    sycl::buffer<float> getrf_scratchpad{scratchpad_size};
+    //float *scratchpad_dev = (float *) malloc_device(scratchpad_size * sizeof(float), device, context);
+    //int64_t *ipiv = (int64_t *) malloc_device((m*n) * sizeof(int64_t), device, context);
+    //float *scratchpad_dev = (float *) malloc_shared(a_size * sizeof(float), device, context);
+    //int64_t *ipiv_dev = (int64_t *) malloc_shared(n * sizeof(int64_t), device, context);
+    try {
+        //int64_t *result = (int64_t *) malloc_shared(1 * sizeof(int64_t), device, context);
+        //auto status = oneapi::mkl::blas::column_major::iamax(device_queue->val, 1, a, 1, result);
+        //__FORCE_MKL_FLUSH__(status);
+#if 0
+        cl_int err;
+        cl_platform_id platform;
+        cl_device_id device;
+        cl_context context;
+        cl_command_queue oclCommandQueue;
+        // Get the first available OpenCL platform
+        err = clGetPlatformIDs(1, &platform, nullptr);
+        if (err != CL_SUCCESS) {
+            std::cerr << "Failed to get OpenCL platform" << std::endl;
+        }
+
+        // Get the first available device on the platform
+        err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, nullptr);
+        if (err != CL_SUCCESS) {
+            std::cerr << "Failed to get OpenCL device" << std::endl;
+            
+        }
+
+        // Create an OpenCL context
+        context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &err);
+        if (err != CL_SUCCESS) {
+            std::cerr << "Failed to create OpenCL context" << std::endl;
+            
+        }
+
+        // Create an OpenCL command queue
+        oclCommandQueue = clCreateCommandQueue(context, device, 0, &err);
+        if (err != CL_SUCCESS) {
+            std::cerr << "Failed to create OpenCL command queue" << std::endl;
+            
+        }
+        //auto sycl_context = sycl::opencl::make_context((pi_native_handle) context);
+        auto sycl_queue = sycl::opencl::make_queue(main_queue.get_context(), (pi_native_handle) oclCommandQueue);
+#endif
+        oneapi::mkl::lapack::getrf(main_queue, n, n, a_buffer, lda, ipiv_buffer, getrf_scratchpad, scratchpad_size);
+    } catch(oneapi::mkl::lapack::exception const& e) {
+        std::cout << "Unexpected exeception caught during synchronous call to LAPACK API: " << e.what() << e.info() << std::endl;
+        info = e.info();
+    } catch (sycl::exception const& e) {
+        std::cout << "Exception caught:  " << e.what() << std::endl;
+    } catch(...) {
+        std::cout << "Other error" << std::endl;
+    }
+
+    //free(getrf_scratchpad, context);
+    //free(ipiv_dev, context);
+}
 
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
                            onemklTranspose transB, int64_t m, int64_t n,

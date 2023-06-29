@@ -30,6 +30,8 @@ typedef enum {
     ONEMKL_SIDE_RIGHT
 } onemklSide;
 
+void onemklSgetrf(syclQueue_t device_queue, int64_t m, int64_t n,
+                             float *a, int64_t lda);
 // XXX: how to expose half in C?
 // int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
 //                onemklTranspose transB, int64_t m, int64_t n, int64_t k,
