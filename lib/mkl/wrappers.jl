@@ -70,6 +70,34 @@ for (fname, elty) in
     end
 end
 
+## geqrf batched
+for (fname, elty) in
+            ((:onemklSgeqrfBatched, :Float32),
+             (:onemklDgeqrfBatched, :Float64))
+    @eval begin
+        function geqrf_batched!(A::Vector{<:oneStridedVecOrMat{$elty}},
+                                m::Number,
+                                n::Number)
+            lda = max(1, stride(A[1],2))
+            Aptrs = unsafe_batch(A)
+            hTauArray = [zeros($elty, min(m,n)) for i in 1:length(A)]
+            TauArray = oneArray{$elty,1}[]
+            for i in 1:length(A)
+                push!(TauArray, oneArray(hTauArray[i]))
+            end
+            Tauptrs = unsafe_batch(TauArray)
+            stridea = max(1, lda * n)
+            stridetau = max(1, min(m,n))
+            queue = global_queue(context(A[1]), device(A[1]))
+            group_count = length(A)
+            groupsize_dev = oneVector{Int}(fill(1,group_count))
+            $fname(sycl_queue(queue), m, n, Aptrs, lda, stridea, Tauptrs, stridetau, group_count, groupsize_dev)
+            unsafe_free!(groupsize_dev)
+            TauArray, A
+        end
+    end
+end
+
 ## (GE) general matrix-matrix multiplication batched
 for (fname, elty) in
         ((:onemklDgemmBatched,:Float64),

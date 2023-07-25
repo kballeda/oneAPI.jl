@@ -113,6 +113,20 @@ function onemklZgeqrf(device_queue, m, n, a, lda, tau)
                                           a::ZePtr{ComplexF64}, lda::Int64, tau::ZePtr{ComplexF64})::Cvoid
 end
 
+function onemklSgeqrfBatched(device_queue, m, n, aptrs, lda, stride_a, tau, stride_tau, group_count, group_size)
+    @ccall liboneapi_support.onemklSgeqrfBatched(device_queue::syclQueue_t, m::Int64, n::Int64,
+                                                 aptrs::ZePtr{Cfloat}, lda::Int64, stride_a::Int64,
+                                                 tau::ZePtr{Cfloat}, stride_tau::Int64, group_count::Int64,
+                                                 group_size::ZePtr{Int64})::Cvoid
+end
+
+function onemklDgeqrfBatched(device_queue, m, n, aptrs, lda, stride_a, tau, stride_tau, group_count, group_size)
+    @ccall liboneapi_support.onemklDgeqrfBatched(device_queue::syclQueue_t, m::Int64, n::Int64,
+                                                 aptrs::ZePtr{Cdouble}, lda::Int64, stride_a::Int64,
+                                                 tau::ZePtr{Cdouble}, stride_tau::Int64, group_count::Int64,
+                                                 group_size::ZePtr{Int64})::Cvoid
+end
+
 function onemklSgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)
     @ccall liboneapi_support.onemklSgemm(device_queue::syclQueue_t, transA::onemklTranspose,

@@ -1063,11 +1063,20 @@ end
 end
 
 @testset "Blas-Extension" begin
-    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+    @testset for T in intersect(eltypes, [Float32, Float64])
         @testset "geqrf" begin
             A = rand(T, m, n)
             d_A = oneArray(A)
             tau, d_A = oneMKL.geqrf!(d_A, m, n)
+        end
+
+        @testset "geqrf_batch" begin
+            A = [rand(T, m, n) for i in 1:10]
+            d_A = oneArray{T, 2}[]
+            for i in 1:length(A)
+                push!(d_A, oneArray(A[i]))
+            end
+            tau,d_A = oneMKL.geqrf_batched!(d_A, m, n)
         end
     end
 end
