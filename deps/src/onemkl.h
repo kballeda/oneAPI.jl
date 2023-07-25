@@ -39,6 +39,10 @@ void onemklCgeqrf(syclQueue_t device_queue, int64_t m, int64_t n,
 void onemklZgeqrf(syclQueue_t device_queue, int64_t m, int64_t n,
                 double _Complex *a, int64_t lda, double _Complex *tau);
 
+void onemklSgetrf(syclQueue_t device_queue, int64_t m, int64_t n,
+                             float *a, int64_t lda, int64_t *ipiv);
+void onemklDgetrf(syclQueue_t device_queue, int64_t m, int64_t n,
+                             double *a, int64_t lda, int64_t *ipiv);
 // XXX: how to expose half in C?
 // int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
 //                onemklTranspose transB, int64_t m, int64_t n, int64_t k,

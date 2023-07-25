@@ -70,6 +70,26 @@ for (fname, elty) in
     end
 end
 
+# getrf implementation
+for (fname, elty) in 
+            ((:onemklSgetrf, :Float32),
+             (:onemklDgetrf, :Float64))
+    @eval begin
+        function getrf!(A::oneStridedVecOrMat{$elty},
+                        m::Number,
+                        n::Number)
+            lda = max(m,n)
+            ipiv_size = max(1, min(m,n))
+            ipiv = zeros($elty, ipiv_size)
+            d_ipiv = oneArray(ipiv)
+            queue = global_queue(context(A), device(A))
+            $fname(sycl_queue(queue), m, n, A, lda, d_ipiv)
+            res_ipiv = Array(d_ipiv)
+            res_ipiv
+        end
+    end
+end
+
 ## (GE) general matrix-matrix multiplication batched
 for (fname, elty) in
         ((:onemklDgemmBatched,:Float64),
