@@ -347,6 +347,47 @@ extern "C" void onemklZdgmmBatched(syclQueue_t device_queue, onemklSide left_rig
     __FORCE_MKL_FLUSH__(status);
 }
 
+extern "C" void onemklSgetrfBatched(syclQueue_t device_queue, int64_t *m, int64_t *n,
+                                    float **a, int64_t *lda, int64_t **ipiv, int64_t group_count,
+                                    int64_t *group_size) {
+    auto main_queue = device_queue->val;
+    auto device = main_queue.get_device();
+    auto context = main_queue.get_context();
+    try {
+    auto getrf_scratchpad_batchsize = oneapi::mkl::lapack::getrf_batch_scratchpad_size<float>(device_queue->val,
+                                        m, n, lda, group_count, group_size);
+    } catch(oneapi::mkl::lapack::exception const &e) {
+      // Handle LAPACK-specific exceptions that happened during synchronous call
+         std::cout << "Unexpected exception caught during synchronous call to LAPACK API:\nreason: " << e.what()
+             << "\ninfo: " << e.info()
+             << "\ndetail: " << e.detail() << std::endl;
+     } catch(std::exception const &e) {
+         // Handle other related exceptions that happened during synchronous call
+         std::cout << "Unexpected exception caught during synchronous call to SYCL API:\n" << e.what() << std::endl;
+     }
+    //std::cout << getrf_scratchpad_batchsize << std::endl;
+    //auto getrf_scratchpad_dev = (float *) malloc_device(getrf_scratchpad_batchsize * sizeof(float), device, context);
+    //auto status = oneapi::mkl::lapack::getrf_batch(device_queue->val, m, n, a, lda, ipiv, group_count, group_size,
+                        //getrf_scratchpad_dev, getrf_scratchpad_batchsize);
+    //__FORCE_MKL_FLUSH__(status);
+    //free(getrf_scratchpad_dev);
+}
+
+extern "C" void onemklDgetrfBatched(syclQueue_t device_queue, int64_t *m, int64_t *n,
+                                    double **a, int64_t *lda, int64_t **ipiv, int64_t group_count,
+                                    int64_t *group_size) {
+    auto main_queue = device_queue->val;
+    auto device = main_queue.get_device();
+    auto context = main_queue.get_context();
+    auto getrf_scratchpad_batchsize = oneapi::mkl::lapack::getrf_batch_scratchpad_size<double>(device_queue->val,
+                                        m, n, lda, group_count, group_size);
+    auto getrf_scratchpad_dev = (double *) malloc_device(getrf_scratchpad_batchsize * sizeof(double), device, context);
+    auto status = oneapi::mkl::lapack::getrf_batch(device_queue->val, m, n, a, lda, ipiv, group_count, group_size,
+                        getrf_scratchpad_dev, getrf_scratchpad_batchsize);
+    __FORCE_MKL_FLUSH__(status);
+    free(getrf_scratchpad_dev);
+}
+
 extern "C" void onemklSgetrf(syclQueue_t device_queue, int64_t m, int64_t n,
                              float *a, int64_t lda, int64_t *ipiv) {
     auto main_queue = device_queue->val;

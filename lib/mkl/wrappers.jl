@@ -194,6 +194,30 @@ for (fname, elty) in
     end
 end
 
+for (fname, elty) in 
+        ((:onemklSgetrfBatched, :Float32),
+         (:onemklDgetrfBatched, :Float64))
+    @eval begin
+        function getrf_batch!(m::Number,
+                              n::Number,
+                              A::Vector{<:oneStridedVecOrMat{$elty}},
+                              ipiv::Vector{<:oneStridedVecOrMat{$elty}})
+            lda = max(1, stride(A[1],2))
+            A_ptrs = unsafe_batch(A)
+            ipiv_ptrs = unsafe_batch(ipiv)
+            bsize = length(A)
+            m_dev = oneVector{Int64}(fill(m, bsize))
+            n_dev = oneVector{Int64}(fill(n, bsize))
+            lda_dev = oneVector{Int64}(fill(lda, bsize))
+            groupsize_dev = oneVector{Int64}(fill(1,bsize))
+            queue = global_queue(context(A[1]), device(A[1]))
+            $fname(sycl_queue(queue), m_dev, n_dev, A_ptrs, lda_dev, ipiv_ptrs,
+                    bsize, groupsize_dev)
+            A,ipiv
+        end
+    end
+end
+
 ## (GE) general matrix-matrix multiplication batched
 for (fname, elty) in
         ((:onemklDgemmBatched,:Float64),

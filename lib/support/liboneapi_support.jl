@@ -203,6 +203,20 @@ function onemklDgetri(device_queue, n, a, lda, ipiv)
                                           a::ZePtr{Cdouble}, lda::Int64, ipiv::ZePtr{Int64})::Cvoid
 end
 
+function onemklSgetrfBatched(device_queue, m, n, a, lda, ipiv, group_count, group_size)
+    @ccall liboneapi_support.onemklSgetrfBatched(device_queue::syclQueue_t, m::ZePtr{Int64},
+                                                n::ZePtr{Int64}, a::ZePtr{Ptr{Cfloat}},
+                                                lda::ZePtr{Int64}, ipiv::ZePtr{Ptr{Int64}},
+                                                group_count::Int64, group_size::ZePtr{Int64})::Cvoid
+end
+
+function onemklDgetrfBatched(device_queue, m, n, a, lda, ipiv, group_count, group_size)
+    @ccall liboneapi_support.onemklDgetrfBatched(device_queue::syclQueue_t, m::ZePtr{Int64},
+                                                n::ZePtr{Int64}, a::ZePtr{Ptr{Cdouble}},
+                                                lda::ZePtr{Int64}, ipiv::ZePtr{Ptr{Int64}},
+                                                group_count::Int64, group_size::ZePtr{Int64})::Cvoid
+end
+
 function onemklSgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)
     @ccall liboneapi_support.onemklSgemm(device_queue::syclQueue_t, transA::onemklTranspose,

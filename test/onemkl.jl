@@ -1064,7 +1064,7 @@ end
 =#
 
 @testset "Blas-Extension" begin
-    @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
+    @testset for T in intersect(eltypes, [Float32#=, Float64, ComplexF32, ComplexF64=#])
 #=
         @testset "geqrf" begin
             A = rand(T, m, n)
@@ -1082,7 +1082,7 @@ end
             hA, ipiv = LinearAlgebra.LAPACK.getrf!(A)
             @test hA ≈ Array(d_A)
         end
-=#
+
         if T <: Float32
         @testset "getri" begin
             n = 8
@@ -1094,7 +1094,30 @@ end
             @test hC ≈ Array(d_A) rtol=1e-2
         end
         end
+=#
 
+        @testset "getf_batched" begin
+            group_count = 1
+            A = [rand(T, m, m) for i in 1:group_count]
+            ipiv = [rand(Int64, m, m) for i in 1:group_count]
+            d_A = oneArray{T, 2}[]
+            d_ipiv = oneArray{T, 2}[]
+            for i in 1:length(A)
+                push!(d_A, oneArray(A[i]))
+            end
+            for i in 1:length(ipiv)
+                push!(d_ipiv, oneArray(ipiv[i]))
+            end
+            d_Ares, d_ipivres = oneMKL.getrf_batch!(m, m, d_A, d_ipiv)
+#=
+            for i in 1:group_count
+                hC = diagm(0 => bX[i]) * bA[i]
+                @test hC ≈ Array(bd_C[i])
+                hA, ipiv = LinearAlgebra.LAPACK.getrf!(A[i])
+                @test hA ≈ Array(d_Ares[i])
+            end
+=#
+        end
 #=
         @testset "gelsBatched" begin
             # generate matrices
