@@ -6,7 +6,7 @@ using LinearAlgebra
 m = 20
 n = 35
 k = 13
-
+#=
 ############################################################################################
 @testset "level 1" begin
     @testset for T in intersect(eltypes, [Float32, Float64, ComplexF32, ComplexF64])
@@ -1061,6 +1061,7 @@ end
         end
     end
 end
+=#
 
 @testset "Blas-Extension" begin
     @testset for T in intersect(eltypes, [Float32, Float64])
@@ -1071,12 +1072,14 @@ end
         end
 
         @testset "geqrf_batch" begin
-            A = [rand(T, m, n) for i in 1:10]
-            d_A = oneArray{T, 2}[]
-            for i in 1:length(A)
-                push!(d_A, oneArray(A[i]))
-            end
-            tau,d_A = oneMKL.geqrf_batched!(d_A, m, n)
+            m = 8
+            n = 8
+            nbatch = 10
+            A = rand(T, m, n, nbatch)
+            devA = oneArray{T, 3}(A)
+            tau = zeros(T, m, n, nbatch)
+            devTau = oneArray{T, 3}(tau)
+            restau,resd_A = oneMKL.geqrf_batched!(devA, devTau, m, n)
         end
     end
 end

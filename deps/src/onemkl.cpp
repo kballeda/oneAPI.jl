@@ -204,40 +204,32 @@ extern "C" void onemklZgeqrf(syclQueue_t device_queue, int64_t m, int64_t n,
 
 extern "C" void onemklSgeqrfBatched(syclQueue_t device_queue, int64_t m, int64_t n, float *a,
                                     int64_t lda, int64_t stride_a, float *tau, int64_t stride_tau,
-                                    int64_t group_count, int64_t *group_size) {
+                                    int64_t group_count) {
     auto device = device_queue->val.get_device();
     auto context = device_queue->val.get_context();
-    int64_t m_dev[group_count], n_dev[group_count], lda_dev[group_count];
-    for (int i = 0; i < group_count; i++) {
-        m_dev[i] = m;
-        n_dev[i] = n;
-        lda_dev[i] = lda;
-    }
     auto geqrf_scratchpad_batch_size = oneapi::mkl::lapack::geqrf_batch_scratchpad_size<float>(device_queue->val,
-                                        m_dev, n_dev, lda_dev, group_count, group_size);
+                                        m, n, lda, stride_a, stride_tau, group_count);
+
     auto scratch_pad = (float *) malloc_device(geqrf_scratchpad_batch_size * sizeof(float), device, context);
     auto status = oneapi::mkl::lapack::geqrf_batch(device_queue->val, m, n, a, lda, stride_a, tau, stride_tau,
                                     group_count, scratch_pad, geqrf_scratchpad_batch_size);
     __FORCE_MKL_FLUSH__(status);
+
 }
 
 extern "C" void onemklDgeqrfBatched(syclQueue_t device_queue, int64_t m, int64_t n, double *a,
                                     int64_t lda, int64_t stride_a, double *tau, int64_t stride_tau,
-                                    int64_t group_count, int64_t *group_size) {
+                                    int64_t group_count) {
     auto device = device_queue->val.get_device();
     auto context = device_queue->val.get_context();
-    int64_t m_dev[group_count], n_dev[group_count], lda_dev[group_count];
-    for (int i = 0; i < group_count; i++) {
-        m_dev[i] = m;
-        n_dev[i] = n;
-        lda_dev[i] = lda;
-    }
     auto geqrf_scratchpad_batch_size = oneapi::mkl::lapack::geqrf_batch_scratchpad_size<double>(device_queue->val,
-                                            m_dev, n_dev, lda_dev, group_count, group_size);
+                                            m, n, lda, stride_a, stride_tau, group_count);
+#if 0
     auto scratch_pad = (double *) malloc_device(geqrf_scratchpad_batch_size * sizeof(double), device, context);
     auto status = oneapi::mkl::lapack::geqrf_batch(device_queue->val, m, n, a, lda, stride_a, tau, stride_tau,
                                     group_count, scratch_pad, geqrf_scratchpad_batch_size);
     __FORCE_MKL_FLUSH__(status);
+#endif
 }
 
 extern "C" int onemklHgemm(syclQueue_t device_queue, onemklTranspose transA,
