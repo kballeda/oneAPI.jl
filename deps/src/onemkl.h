@@ -533,6 +533,15 @@ void onemklCswap(syclQueue_t device_queue, int64_t n, float _Complex *x, int64_t
 void onemklZswap(syclQueue_t device_queue, int64_t n, double _Complex *x, int64_t incx,
                 double _Complex *y, int64_t incy);
 
+void onemklSsparseGemm(syclQueue_t device_queue, 
+                    onemklTranspose transpose_A, onemklTranspose transpose_B, const float alpha,
+                    float *b, int64_t columns, int64_t ldb, float beta, float *c,
+                    int64_t ldc);
+void onemklDsparseGemm(syclQueue_t device_queue,
+                    onemklTranspose transpose_A, onemklTranspose transpose_B, const double alpha,
+                    double *b, int64_t columns, int64_t ldb, double beta, double *c,
+                    int64_t ldc);
+
 void onemklDestroy(void);
 #ifdef __cplusplus
 }

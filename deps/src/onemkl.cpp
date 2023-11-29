@@ -4,7 +4,9 @@
 #include <exception>
 #include <memory>
 #include <oneapi/mkl.hpp>
-
+#include "mkl.h"
+#include <CL/sycl.hpp>
+#include <mkl_types.h>
 // This is a workaround to flush MKL submissions into Level-zero queue, using
 // unspecified but guaranteed behavior of intel-sycl runtime. Once SYCL standard
 // committee approves sycl::queue::flush() we will change the macro to use that
@@ -1539,6 +1541,24 @@ extern "C" void onemklZswap(syclQueue_t device_queue, int64_t n, double _Complex
                             reinterpret_cast<std::complex<double> *>(x), incx,
                             reinterpret_cast<std::complex<double> *>(y), incy);
     __FORCE_MKL_FLUSH__(status);
+}
+
+// Sparse Blas
+
+void onemklSsparseGemm(syclQueue_t device_queue,
+                    onemklTranspose transpose_A, onemklTranspose transpose_B, const float alpha,
+                    float *b, int64_t columns, int64_t ldb, float beta, float *c,
+                    int64_t ldc) {
+    oneapi::mkl::transpose t_A = oneapi::mkl::transpose::nontrans;
+    oneapi::mkl::transpose t_B = oneapi::mkl::transpose::nontrans;
+    oneapi::mkl::layout dense_matrix_layout = oneapi::mkl::layout::col_major;
+    //std::vector<intType, mkl_allocator<intType, 64>> ia_vec;
+    oneapi::mkl::sparse::matrix_handle_t handle = nullptr;
+    try {
+        oneapi::mkl::sparse::init_matrix_handle(&handle);
+    } catch (sycl::exception const &e) {
+        std::cout << "\t\t Caught synchronous SYCL execption \n" << e.what() << std::endl;
+    }
 }
 
 // other
