@@ -1542,7 +1542,36 @@ extern "C" void onemklZswap(syclQueue_t device_queue, int64_t n, double _Complex
 }
 
 // other
+extern "C" void onemklKaliTest(syclQueue_t device_queue) {
+    std::cout << "Hey I am in Kali Test" << std::endl;
+    auto cxt = device_queue->val.get_context();
+    auto dev = device_queue->val.get_device();
+    auto size = 4;
+    auto nrows = size * size * size;
+    auto sizea = nrows * 20;
+    auto sizeia = nrows + 1;
+    auto sizeja = nrows + 20;
+    auto sizevec = nrows;
 
+    float alpha = 1.0;
+    float beta = 0.0;
+
+    oneapi::mkl::sparse::matrix_handle_t handle = nullptr;
+    oneapi::mkl::sparse::init_matrix_handle(&handle);
+    auto ia = (std::int32_t *)malloc_device(sizeia * sizeof(std::int32_t), dev, cxt);
+    auto ja = (std::int32_t *)malloc_device(sizeja * sizeof(std::int32_t), dev, cxt);
+    auto A = (float *)malloc_device(sizea *sizeof(float), dev, cxt);
+    auto x = (float *)malloc_device(sizevec * sizeof(float), dev, cxt);
+    auto y = (float *)malloc_device(sizevec * sizeof(float), dev, cxt);
+    auto z = (float *)malloc_device(sizevec * sizeof(float), dev, cxt);
+
+    auto ev_set = oneapi::mkl::sparse::set_csr_data(device_queue->val, handle, nrows, nrows, oneapi::mkl::index_base::zero, ia, ja, A);
+    auto ev_opt = optimize_gemv(device_queue->val, oneapi::mkl::transpose::nontrans, handle, {ev_set});
+    auto ev_gemv = oneapi::mkl::sparse::gemv(device_queue->val, oneapi::mkl::transpose::nontrans, alpha, 
+                                            handle, x, beta, y, {ev_opt});
+    auto ev_release = oneapi::mkl::sparse::release_matrix_handle(device_queue->val, &handle, {ev_gemv});
+    ev_release.wait();
+}
 // oneMKL keeps a cache of SYCL queues and tries to destroy them when unloading the library.
 // that is incompatible with oneAPI.jl destroying queues before that, so expose a function
 // to manually wipe the device cache when we're destroying queues.

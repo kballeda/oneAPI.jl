@@ -533,6 +533,8 @@ void onemklCswap(syclQueue_t device_queue, int64_t n, float _Complex *x, int64_t
 void onemklZswap(syclQueue_t device_queue, int64_t n, double _Complex *x, int64_t incx,
                 double _Complex *y, int64_t incy);
 
+void onemklKaliTest(syclQueue_t device_queue);
+
 void onemklDestroy(void);
 #ifdef __cplusplus
 }

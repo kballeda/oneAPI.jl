@@ -50,6 +50,16 @@ end
     return oneArray(ptrs)
 end
 
+for (fname, elty) in ((:onemklKaliTest,:Float32),
+                      (:onemklKaliTest_2,:Float64))
+    @eval begin
+        function kaliTest(val1::Number,
+                          x::oneStridedArray{$elty})
+            queue = global_queue(context(x), device(x))
+            $fname(sycl_queue(queue))
+        end
+    end
+end
 ## (GE) general matrix-matrix multiplication batched
 for (fname, elty) in
         ((:onemklDgemmBatched,:Float64),

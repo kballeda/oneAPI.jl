@@ -40,9 +40,10 @@ if !isfile(joinpath(conda_dir, "condarc-julia.yml"))
     mkpath(joinpath(conda_dir, "conda-meta"))
     touch(joinpath(conda_dir, "conda-meta", "history"))
 end
-Conda.add(["dpcpp_linux-64=2023.0.0", "mkl-devel-dpcpp=2023.0.0"], conda_dir;
+#Conda.add(["dpcpp_linux-64=2023.0.0", "mkl-devel-dpcpp=2023.0.0"], conda_dir;
+Conda.add(["dpcpp_linux-64=2023.2.0", "mkl-devel-dpcpp=2023.2.0"], conda_dir;
           channel="intel")
-
+Conda.update()
 Conda.list(conda_dir)
 
 # XXX: isn't there a Conda package providing ze_api.hpp?

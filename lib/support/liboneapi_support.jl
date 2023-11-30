@@ -93,6 +93,10 @@ end
     ONEMKL_SIDE_RIGHT = 1
 end
 
+function onemklKaliTest(device_queue)
+    @ccall liboneapi_support.onemklKaliTest(device_queue::syclQueue_t)::Cvoid
+end
+
 function onemklSgemm(device_queue, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C,
                      ldc)
     @ccall liboneapi_support.onemklSgemm(device_queue::syclQueue_t, transA::onemklTranspose,
