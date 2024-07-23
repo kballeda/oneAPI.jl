@@ -1,0 +1,55 @@
+kali@sdp:~/Kali/2023/2705_rotbug/oneAPI.jl$ $JULIA --project -L test/setup.jl test/rotbug.jl
+x = ComplexF64[1.0 + 0.0im]
+y = ComplexF64[1.0 + 0.0im]
+x = ComplexF64[1.3928964429210167 + 0.0im]
+Array(d_x) = ComplexF64[0.9592049927584356 + 0.0im]
+c = 0.8187587885612081
+s = 0.5741376543598085 + 0.0im
+ERROR: LoadError: AssertionError: x == Array(d_x)
+Stacktrace:
+ [1] main(; n::Int64, T::Type{ComplexF64})
+   @ Main ~/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:36
+ [2] main()
+   @ Main ~/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:4
+ [3] top-level scope
+   @ ~/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:39
+in expression starting at /home/kali/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:39
+kali@sdp:~/Kali/2023/2705_rotbug/oneAPI.jl$ vim test/rotbug.jl
+kali@sdp:~/Kali/2023/2705_rotbug/oneAPI.jl$ $JULIA --project -L test/setup.jl test/rotbug.jl
+x = ComplexF64[1.0 + 0.0im]
+y = ComplexF64[1.0 + 0.0im]
+x = ComplexF64[1.3928964429210167 + 0.0im]
+Array(d_x) = ComplexF64[1.3928964429210167 + 0.0im]
+c = 0.8187587885612081
+s = 0.5741376543598085 + 0.0im
+kali@sdp:~/Kali/2023/2705_rotbug/oneAPI.jl$ $JULIA --project -L test/setup.jl test/rotbug.jl
+x = ComplexF64[1.0 + 0.0im]
+y = ComplexF64[1.0 + 0.0im]
+x = ComplexF64[1.3928964429210167 + 0.0im]
+Array(d_x) = ComplexF64[0.9592049927584356 + 0.0im]
+c = 0.8187587885612081
+s = 0.5741376543598085 + 0.0im
+ERROR: LoadError: AssertionError: x == Array(d_x)
+Stacktrace:
+ [1] main(; n::Int64, T::Type{ComplexF64})
+   @ Main ~/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:37
+ [2] main()
+   @ Main ~/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:4
+ [3] top-level scope
+   @ ~/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:40
+in expression starting at /home/kali/Kali/2023/2705_rotbug/oneAPI.jl/test/rotbug.jl:40
+kali@sdp:~/Kali/2023/2705_rotbug/oneAPI.jl$ $JULIA --project -L test/setup.jl test/rotbug.jl
+x = ComplexF64[1.0 + 0.0im]
+y = ComplexF64[1.0 + 0.0im]
+x = ComplexF64[1.3928964429210167 + 0.0im]
+Array(d_x) = ComplexF64[1.3928964429210167 + 0.0im]
+c = 0.8187587885612081
+s = 0.5741376543598085 + 0.0im
+kali@sdp:~/Kali/2023/2705_rotbug/oneAPI.jl$ $JULIA --project -L test/setup.jl test/rotbug.jl
+x = ComplexF64[1.0 + 0.0im]
+y = ComplexF64[1.0 + 0.0im]
+x = ComplexF64[1.3928964429210167 + 0.0im]
+Array(d_x) = ComplexF64[1.3928964429210167 + 0.0im]
+c = 0.8187587885612081
+s = 0.5741376543598085 + 0.0im
+kali@sdp:~/Kali/2023/2705_rotbug/oneAPI.jl$

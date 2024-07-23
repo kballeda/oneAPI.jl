@@ -1,0 +1,121 @@
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ ./rotate.exe 
+c: 0.818759s: (0.574138,0)
+(1,0)
+GPU Results: 
+1
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+Done with GPU Rotate !!, Starting CPU rotate
+CPU Results: 
+X - array
+(1.3929,0) 
+Y - array
+(0.244621,0) 
+kali@sdp:~/Kali/2023/2705_rotbug/onemkl_reproducer/2023.1.0/examples/dpcpp/blas/source$ 
